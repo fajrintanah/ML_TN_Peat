@@ -7,4 +7,4 @@
 
 #submitted to CELEBES Agricultural Journal https://ojs.untika.ac.id/index.php/faperta/
 
-#All values will be erased immediately after the manuscript is accepted 
+#All values will be removed immediately after the manuscript is accepted 
