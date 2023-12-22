@@ -1,0 +1,1776 @@
+library(tidyverse) # plotting and manipulation
+library(grid) # combining plots
+library(gridExtra) # combining plots
+library(ggpubr) # combining plots
+library(patchwork) # combining plots
+library(ggfortify) # nice extension for ggplot
+library(mgcv) #fitting gam models
+library(GGally) # displaying pairs panel
+library(caTools) # split dataset
+library(readxl)
+library(randomForest)
+library(e1071)
+library(gbm)          # basic implementation
+library(xgboost)      # a faster implementation of gbm
+library(caret)        # an aggregator package for performing many machine learning models
+library(pdp)          # model visualization
+library(lime)         # model visualization
+library(neuralnet)
+library(rpart)     #rpart for computing decision tree models
+library(rsample)     # data splitting 
+library(dplyr)       # data wrangling
+library(rpart.plot)  # plotting regression trees
+library(ipred)       # bagging
+library(broom)
+library(ranger) 	#efficient RF
+library(NeuralNetTools)
+library(tidymodels)
+library(earth) 		#MARS model
+library(iml)		#most robust and efficient relative importance 
+library(xgboost)	#extreeme gradient boosting
+library(ModelMetrics) #get model metrics
+library(Metrics) 	#get ML model metrics
+library(Cubist) #Cubist model
+library(FactoMineR)#PCANguyen
+library(factoextra) #PCANguyen
+library(rattle)
+library(vip)
+library(shapper)
+library("DALEX2")
+library(viridis)
+library(tidytext)
+library(fastshap)
+library(shapviz)
+library(readxl)
+library(boot)
+
+library(readxl)
+N_all_fix <- read_excel("D:/Publikasi/Pak Heru B Pulunggono/16 Machine Learning for N in peat yusuf/data/R_fix_yusuf.xlsx")
+View(N_all_fix)
+str(N_all_fix)
+		tibble [120 × 13] (S3: tbl_df/tbl/data.frame)
+		 $ LU_OP   : num [1:120] 1 1 1 1 1 1 1 1 1 1 ...
+		 $ LU_B    : num [1:120] 0 0 0 0 0 0 0 0 0 0 ...
+		 $ OP_Dist1: num [1:120] 1 1 1 1 1 1 1 1 1 1 ...
+		 $ OP_Dist2: num [1:120] 0 0 0 0 0 0 0 0 0 0 ...
+		 $ OP_Dist3: num [1:120] 0 0 0 0 0 0 0 0 0 0 ...
+		 $ OP_Dist4: num [1:120] 0 0 0 0 0 0 0 0 0 0 ...
+		 $ Depth   : num [1:120] 20 40 60 20 40 60 20 40 60 20 ...
+		 $ Org_C   : num [1:120] 0.38 0.417 0.487 0.546 0.555 ...
+		 $ pH      : num [1:120] 3.99 3.77 3.72 3.99 3.84 3.78 3.92 3.85 3.73 3.63 ...
+		 $ Total_N : num [1:120] 0.438 0.326 0.739 0.389 0.237 ...
+		 $ PD      : num [1:120] 1.83 1.77 1.62 1.83 1.77 1.62 1.76 1.77 1.62 1.83 ...
+		 $ BD      : num [1:120] 0.166 0.105 0.103 0.163 0.115 ...
+		 $ Total_Fe: num [1:120] 325 219 182 675 183 ...
+		 
+N_all_fix <- na.omit(N_all_fix)
+
+str(N_all_fix)
+		tibble [109 × 13] (S3: tbl_df/tbl/data.frame)
+		 $ LU_OP   : num [1:109] 1 1 1 1 1 1 1 1 1 1 ...
+		 $ LU_B    : num [1:109] 0 0 0 0 0 0 0 0 0 0 ...
+		 $ OP_Dist1: num [1:109] 1 1 1 1 1 1 1 1 1 1 ...
+		 $ OP_Dist2: num [1:109] 0 0 0 0 0 0 0 0 0 0 ...
+		 $ OP_Dist3: num [1:109] 0 0 0 0 0 0 0 0 0 0 ...
+		 $ OP_Dist4: num [1:109] 0 0 0 0 0 0 0 0 0 0 ...
+		 $ Depth   : num [1:109] 20 40 60 20 40 60 20 40 20 40 ...
+		 $ Org_C   : num [1:109] 0.38 0.417 0.487 0.546 0.555 ...
+		 $ pH      : num [1:109] 3.99 3.77 3.72 3.99 3.84 3.78 3.92 3.85 3.63 3.55 ...
+		 $ Total_N : num [1:109] 0.438 0.326 0.739 0.389 0.237 ...
+		 $ PD      : num [1:109] 1.83 1.77 1.62 1.83 1.77 1.62 1.76 1.77 1.83 1.77 ...
+		 $ BD      : num [1:109] 0.166 0.105 0.103 0.163 0.115 ...
+		 $ Total_Fe: num [1:109] 325 219 182 675 183 ...
+		 - attr(*, "na.action")= 'omit' Named int [1:11] 9 21 40 43 49 55 56 57 58 93 ...
+		  ..- attr(*, "names")= chr [1:11] "9" "21" "40" "43" ...
+
+
+## bootstrapping with replacement 
+
+boots_N <- N_all_fix %>% 
+  bind_rows(
+    N_all_fix %>% 
+      sample_n(500,replace = TRUE) 
+  )
+  
+str(boots_N)
+		tibble [609 × 13] (S3: tbl_df/tbl/data.frame)
+		 $ LU_OP   : num [1:609] 1 1 1 1 1 1 1 1 1 1 ...
+		 $ LU_B    : num [1:609] 0 0 0 0 0 0 0 0 0 0 ...
+		 $ OP_Dist1: num [1:609] 1 1 1 1 1 1 1 1 1 1 ...
+		 $ OP_Dist2: num [1:609] 0 0 0 0 0 0 0 0 0 0 ...
+		 $ OP_Dist3: num [1:609] 0 0 0 0 0 0 0 0 0 0 ...
+		 $ OP_Dist4: num [1:609] 0 0 0 0 0 0 0 0 0 0 ...
+		 $ Depth   : num [1:609] 20 40 60 20 40 60 20 40 20 40 ...
+		 $ Org_C   : num [1:609] 0.38 0.417 0.487 0.546 0.555 ...
+		 $ pH      : num [1:609] 3.99 3.77 3.72 3.99 3.84 3.78 3.92 3.85 3.63 3.55 ...
+		 $ Total_N : num [1:609] 0.438 0.326 0.739 0.389 0.237 ...
+		 $ PD      : num [1:609] 1.83 1.77 1.62 1.83 1.77 1.62 1.76 1.77 1.83 1.77 ...
+		 $ BD      : num [1:609] 0.166 0.105 0.103 0.163 0.115 ...
+		 $ Total_Fe: num [1:609] 325 219 182 675 183 ...
+		 - attr(*, "na.action")= 'omit' Named int [1:11] 9 21 40 43 49 55 56 57 58 93 ...
+		  ..- attr(*, "names")= chr [1:11] "9" "21" "40" "43" ...
+
+
+# Change background color to tiles in the upper triangular matrix of plots 
+windowsFonts(Palatino=windowsFont("Palatino Linotype"))
+
+N_all_fix_corr = subset(N_all_fix, select = -c(1:6))
+
+		tibble [109 × 7] (S3: tbl_df/tbl/data.frame)
+		 $ Depth   : num [1:109] 20 40 60 20 40 60 20 40 20 40 ...
+		 $ Org_C   : num [1:109] 0.38 0.417 0.487 0.546 0.555 ...
+		 $ pH      : num [1:109] 3.99 3.77 3.72 3.99 3.84 3.78 3.92 3.85 3.63 3.55 ...
+		 $ Total_N : num [1:109] 0.438 0.326 0.739 0.389 0.237 ...
+		 $ PD      : num [1:109] 1.83 1.77 1.62 1.83 1.77 1.62 1.76 1.77 1.83 1.77 ...
+		 $ BD      : num [1:109] 0.166 0.105 0.103 0.163 0.115 ...
+		 $ Total_Fe: num [1:109] 325 219 182 675 183 ...
+		 - attr(*, "na.action")= 'omit' Named int [1:11] 9 21 40 43 49 55 56 57 58 93 ...
+		  ..- attr(*, "names")= chr [1:11] "9" "21" "40" "43" ...
+		  
+my_fn_corr <- function(data, mapping, method="p", use="pairwise", ...){
+
+              # grab data
+              x <- eval_data_col(data, mapping$x)
+              y <- eval_data_col(data, mapping$y)
+
+              # calculate correlation
+              corr <- cor(x, y, method=method, use='complete.obs')
+
+              # calculate colour based on correlation value
+              # Here I have set a correlation of minus one to blue, 
+              # zero to white, and one to red 
+              # Change this to suit: possibly extend to add as an argument of `my_fn_corr`
+              colFn <- colorRampPalette(c("dodgerblue", "darkseagreen1", "green4"), interpolate ='spline')
+              fill <- colFn(100)[findInterval(corr, seq(-1, 1, length=100))]
+
+              ggally_cor(data = data, mapping = mapping, ...) + 
+                theme_void() +
+                theme(panel.background = element_rect(fill=fill))
+            }
+
+p1_corr <- ggpairs(N_all_fix_corr, 
+                   upper = list(continuous = my_fn_corr),
+                   lower = list(continuous = "smooth"))  			
+p1_corr+theme(text = element_text(size=11, family="Palatino"))			
+
+#correlation of boostrapped sampling
+
+N_all_boot_corr = subset(boots_N, select = -c(1:6))
+
+p1_boot_corr <- ggpairs(N_all_boot_corr, 
+                   upper = list(continuous = my_fn_corr),
+                   lower = list(continuous = "smooth"))  			
+p1_boot_corr+theme(text = element_text(size=11, family="Palatino"))	
+
+
+
+
+## Modelling
+
+
+set.seed(42)
+
+Split_N_all <- sample.split(Y=boots_N$Total_N, SplitRatio=0.7)
+train_N_all<- subset(x=boots_N, Split_N_all==TRUE)
+test_N_all <- subset(x=boots_N, Split_N_all==FALSE)
+
+x_train_N_all = subset(train_N_all, select = -Total_N) %>% as.matrix() 
+y_train_N_all = train_N_all$Total_N
+
+x_test_N_all = subset(test_N_all, select = -Total_N) %>% as.matrix() 
+y_test_N_all = test_N_all$Total_N 
+
+X_df_train <- data.frame(x_train_N_all)
+x_df_test <- data.frame(x_test_N_all)
+train_N_all_df <- data.frame(train_N_all)
+test_N_all_df <-data.frame(test_N_all)
+
+summary(train_N_all)
+			LU_OP             LU_B           OP_Dist1        OP_Dist2    
+		 Min.   :0.0000   Min.   :0.0000   Min.   :0.000   Min.   :0.000  
+		 1st Qu.:0.0000   1st Qu.:0.0000   1st Qu.:0.000   1st Qu.:0.000  
+		 Median :1.0000   Median :0.0000   Median :1.000   Median :0.000  
+		 Mean   :0.7477   Mean   :0.2523   Mean   :2.093   Mean   :0.215  
+		 3rd Qu.:1.0000   3rd Qu.:1.0000   3rd Qu.:4.500   3rd Qu.:0.000  
+		 Max.   :1.0000   Max.   :1.0000   Max.   :4.500   Max.   :1.000  
+			OP_Dist3         OP_Dist4          Depth           Org_C       
+		 Min.   :0.0000   Min.   :0.0000   Min.   :20.00   Min.   :0.3783  
+		 1st Qu.:0.0000   1st Qu.:0.0000   1st Qu.:20.00   1st Qu.:0.4874  
+		 Median :0.0000   Median :0.0000   Median :40.00   Median :0.5374  
+		 Mean   :0.2617   Mean   :0.2523   Mean   :40.79   Mean   :0.5165  
+		 3rd Qu.:1.0000   3rd Qu.:1.0000   3rd Qu.:60.00   3rd Qu.:0.5552  
+		 Max.   :1.0000   Max.   :1.0000   Max.   :60.00   Max.   :0.5700  
+			   pH           Total_N              PD              BD         
+		 Min.   :3.440   Min.   :0.06157   Min.   :0.660   Min.   :0.05999  
+		 1st Qu.:3.630   1st Qu.:0.23562   1st Qu.:1.230   1st Qu.:0.09840  
+		 Median :3.720   Median :0.38631   Median :1.620   Median :0.11451  
+		 Mean   :3.709   Mean   :0.38691   Mean   :1.506   Mean   :0.11674  
+		 3rd Qu.:3.790   3rd Qu.:0.49361   3rd Qu.:1.770   3rd Qu.:0.13922  
+		 Max.   :3.990   Max.   :0.78432   Max.   :2.000   Max.   :0.18205  
+			Total_Fe     
+		 Min.   : 33.16  
+		 1st Qu.:182.46  
+		 Median :316.01  
+		 Mean   :366.17  
+		 3rd Qu.:516.99  
+		 Max.   :791.34  
+
+summary(test_N_all )
+			 LU_OP             LU_B           OP_Dist1       OP_Dist2     
+		 Min.   :0.0000   Min.   :0.0000   Min.   :0.00   Min.   :0.0000  
+		 1st Qu.:1.0000   1st Qu.:0.0000   1st Qu.:1.00   1st Qu.:0.0000  
+		 Median :1.0000   Median :0.0000   Median :1.00   Median :0.0000  
+		 Mean   :0.7514   Mean   :0.2486   Mean   :2.13   Mean   :0.2155  
+		 3rd Qu.:1.0000   3rd Qu.:0.0000   3rd Qu.:4.50   3rd Qu.:0.0000  
+		 Max.   :1.0000   Max.   :1.0000   Max.   :4.50   Max.   :1.0000  
+			OP_Dist3         OP_Dist4          Depth           Org_C       
+		 Min.   :0.0000   Min.   :0.0000   Min.   :20.00   Min.   :0.3783  
+		 1st Qu.:0.0000   1st Qu.:0.0000   1st Qu.:20.00   1st Qu.:0.4874  
+		 Median :0.0000   Median :0.0000   Median :40.00   Median :0.5409  
+		 Mean   :0.2707   Mean   :0.2486   Mean   :40.77   Mean   :0.5165  
+		 3rd Qu.:1.0000   3rd Qu.:0.0000   3rd Qu.:60.00   3rd Qu.:0.5552  
+		 Max.   :1.0000   Max.   :1.0000   Max.   :60.00   Max.   :0.5700  
+			   pH           Total_N              PD              BD         
+		 Min.   :3.440   Min.   :0.06157   Min.   :0.660   Min.   :0.05999  
+		 1st Qu.:3.630   1st Qu.:0.23651   1st Qu.:1.260   1st Qu.:0.09476  
+		 Median :3.720   Median :0.38631   Median :1.620   Median :0.11451  
+		 Mean   :3.712   Mean   :0.38997   Mean   :1.515   Mean   :0.11779  
+		 3rd Qu.:3.800   3rd Qu.:0.49573   3rd Qu.:1.770   3rd Qu.:0.14000  
+		 Max.   :3.990   Max.   :0.78432   Max.   :2.000   Max.   :0.18205  
+			Total_Fe     
+		 Min.   : 33.16  
+		 1st Qu.:182.72  
+		 Median :318.86  
+		 Mean   :368.13  
+		 3rd Qu.:516.99  
+		 Max.   :791.34  
+
+
+##visualize distribution 
+
+
+N_train <- train_N_all%>%
+  add_column(Status = "Training")
+
+N_test <- test_N_all%>%
+  add_column(Status = "Validation")
+
+N_df <- bind_rows(N_train, N_test)
+
+str(N_df)
+
+windowsFonts(Palatino=windowsFont("Palatino Linotype"))
+
+
+# Represent it
+plot_dist_N <- N_df %>% 
+				ggplot( aes(x=Total_N, color=Status, fill=Status)) +
+				geom_density(alpha = 0.5, linewidth=0.8)+
+				#geom_histogram( color="#e9ecef", alpha=0.6, position = 'identity') +
+				scale_fill_manual(values=c("#69b3a2", "#404080")) +
+				scale_color_manual(values=c("#69b3a2", "#404080")) +
+				theme_bw()+
+				labs(x = " Total N (%)", y = "Frequency")+
+				theme(text=element_text(size=13,family="Palatino"))
+				
+				
+plot_dist_N
+
+
+
+
+baru_N <-  N_df%>% subset(,-c(1:7))%>%
+		pivot_longer(cols = -"Status", names_to="Property", values_to="value")
+
+str(baru_N)	
+		tibble [3,654 × 3] (S3: tbl_df/tbl/data.frame)
+		 $ Status  : chr [1:3654] "Training" "Training" "Training" "Training" ...
+		 $ Property: chr [1:3654] "Org_C" "pH" "Total_N" "PD" ...
+		 $ value   : num [1:3654] 0.417 3.77 0.326 1.77 0.105 ...
+
+IndvarNames1 = list(
+'BD'="BD (g/cm3)",
+'Org_C'="Org-C (%)",
+'PD'="PD (g/cm3)",
+'pH'="pH",
+'Total_N'="Total N (%)",
+'Total_Fe' = "Total Fe (mg/kg")
+
+#bikin fungsi label, passing ke facet_wrap ggplot2
+
+indvar_labeller1 <- function(variable,value){
+  return(IndvarNames1[value])
+}
+
+
+# fungsi eliminasi outlier, passing ke stat_summary ggplot2
+
+calc_stat1 <- function(x) {
+  coef <- 1.5
+  n <- sum(!is.na(x))
+  # calculate quantiles
+  stats <- quantile(x, probs = c(0.1, 0.25, 0.5, 0.75, 0.9))
+  names(stats) <- c("ymin", "lower", "middle", "upper", "ymax")
+  return(stats)
+}
+
+
+windowsFonts(Times=windowsFont("Times New Roman"))		
+
+boxplot_N <- baru_N %>%
+				ggplot(aes(x=Property, y=value, fill=Status)) +
+				stat_summary(aes(fill=factor(Status)), fun.data = calc_stat1, geom="boxplot" ,
+								position=position_dodge(width=1.1),alpha = 0.7 ) + 
+				facet_wrap(~Property, labeller=indvar_labeller1, scales="free")+
+				scale_fill_manual(values=c("#69b3a2", "#404080")) +
+				theme_bw()+
+				theme(text=element_text(size=13, family="Palatino"),
+				axis.text.x=element_blank(),
+				axis.title.x=element_blank(),
+				axis.title.y=element_blank())
+
+boxplot_N
+
+
+plot_dist_N+boxplot_N+plot_layout(ncol=1)
+
+
+##modeling 
+
+set.seed = 42
+MLR_N_All <- train(
+  x 			= x_train_N_all,
+  y 			= y_train_N_all,
+  method = "lm",
+  family = "gaussian",
+  metric = "RMSE",
+  trControl = trainControl(method = "repeatedcv", number = 5, repeats=10)
+)
+
+MLR_N_All 
+		Linear Regression 
+
+		428 samples
+		 12 predictor
+
+		No pre-processing
+		Resampling: Cross-Validated (5 fold, repeated 10 times) 
+		Summary of sample sizes: 344, 341, 344, 341, 342, 342, ... 
+		Resampling results:
+
+		  RMSE       Rsquared 
+		  0.1475156  0.2381227
+		  MAE      
+		  0.1228054
+
+		Tuning parameter
+		 held constant at a value
+		 of TRUE
+
+
+preds_MLR_N_All <- predict(MLR_N_All, test_N_all)
+
+modelEval_MLR_N_All <- cbind(test_N_all$Total_N, preds_MLR_N_All)
+colnames(modelEval_MLR_N_All) <- c('Actual', 'Predicted')
+modelEval_MLR_N_All <- as.data.frame(modelEval_MLR_N_All)
+
+mse_MLR_N_All <- mean((modelEval_MLR_N_All$Actual - modelEval_MLR_N_All$Predicted)^2)
+rmse_MLR_N_All <- sqrt(mse_MLR_N_All)
+rmse_MLR_N_All
+	[1] 0.1476711
+
+mae_MLR_N_All <- ModelMetrics::mae(y_test_N_all, preds_MLR_N_All)
+mae_MLR_N_All
+		[1] 0.1229203
+
+bias_MLR_N_All <- Metrics::bias(y_test_N_all, preds_MLR_N_All)
+bias_MLR_N_All
+		[1] 0.001956961
+
+
+
+## Log - GLM regression
+
+tuned_log_N_All <- train(
+  x 			= x_train_N_all,
+  y 			= y_train_N_all,
+  method = "glm",
+  family = "binomial",
+  metric = "RMSE",
+  trControl = trainControl(method = "repeatedcv", number = 5, repeats=10)
+)
+
+tuned_log_N_All
+		Generalized Linear Model 
+
+			428 samples
+			 12 predictor
+
+			No pre-processing
+			Resampling: Cross-Validated (5 fold, repeated 10 times) 
+			Summary of sample sizes: 342, 342, 342, 343, 343, 343, ... 
+			Resampling results:
+
+			  RMSE       Rsquared 
+			  0.1466554  0.2467743
+			  MAE      
+			  0.1225073
+
+preds_LOG_GLM_N_All <- predict(tuned_log_N_All, test_N_all)
+
+modelEval_LOG_GLM_N_All <- cbind(test_N_all$Total_N, preds_LOG_GLM_N_All)
+colnames(modelEval_LOG_GLM_N_All) <- c('Actual', 'Predicted')
+modelEval_LOG_GLM_N_All <- as.data.frame(modelEval_LOG_GLM_N_All)
+
+mse_LOG_GLM_N_All <- mean((modelEval_LOG_GLM_N_All$Actual - modelEval_LOG_GLM_N_All$Predicted)^2)
+rmse_LOG_GLM_N_All <- sqrt(mse_LOG_GLM_N_All)
+rmse_LOG_GLM_N_All
+	[1] 0.1472854
+
+mae_log_GLM_N_All <- ModelMetrics::mae(y_test_N_all, preds_LOG_GLM_N_All)
+mae_log_GLM_N_All
+	[1] 0.1227592
+
+bias_log_GLM_N_All <- Metrics::bias(y_test_N_all, preds_LOG_GLM_N_All)
+bias_log_GLM_N_All
+	[1] 0.001846029
+
+
+# Multivariate adaptive regression spline
+
+hyper_grid_mars <- expand.grid(
+  degree = 1:5, 
+  nprune = seq(2, 100, length.out = 10) %>% floor()
+)
+
+set.seed(42)
+# cross validated model
+tuned_mars_N_All <- train(
+  x 			= X_df_train,
+  y 			= y_train_N_all,
+  method 		= "earth",
+  metric 		= "RMSE",
+  trControl 	= trainControl(method = "repeatedcv", number = 5, repeats = 10),
+  tuneGrid 		= hyper_grid_mars
+							)
+summary(tuned_mars_N_All)
+		Call:
+					earth(x=data.frame[76,12],
+					y=c(0.7393,0.2365...),
+					keepxy=TRUE,
+					degree=1,
+					nprune=2)
+
+					coefficients
+		(Intercept)  0.341266939
+		h(Depth-40)  0.007317338
+
+		Selected 2 of 18 terms, and 1 of 12 predictors (nprune=2)
+		Termination condition: Reached nk 25
+		Importance: Depth, ...
+		Number of terms at each degree of interaction: 1 1 (additive model)
+		GCV 0.02606395    RSS 1.827563    GRSq 0.1148021    RSq 0.1613832
+
+tuned_mars_N_All$bestTune
+		  nprune degree
+		1      2      1
+
+preds_MARS_N_All <- predict(tuned_mars_N_All, test_N_all)
+
+modelEval_MARS_N_All <- cbind(test_N_all$Total_N, preds_MARS_N_All)
+colnames(modelEval_MARS_N_All) <- c('Actual', 'Predicted')
+modelEval_MARS_N_All <- as.data.frame(modelEval_MARS_N_All)
+
+mse_MARS_N_All <- mean((modelEval_MARS_N_All$Actual - modelEval_MARS_N_All$Predicted)^2)
+rmse_MARS_N_All <- sqrt(mse_MARS_N_All)
+rmse_MARS_N_All
+	[1] 0.1548442
+
+mae_mars_N_All <- ModelMetrics::mae(y_test_N_all, preds_MARS_N_All)
+mae_mars_N_All
+	[1] 0.1259271
+
+bias_mars_N_All <- Metrics::bias(y_test_N_all, preds_MARS_N_All)
+bias_mars_N_All
+	[1] 0.0001894043
+
+
+
+## Random Forest
+
+hyper_grid_RF_N_all <- expand.grid(
+  mtry       = seq(2, 6, by = 1),
+  node_size  = seq(20, 30, by = 1),
+  num.trees	 = seq(50, 1000, by = 50),
+  OOB_RMSE   = 0
+)
+
+for(i in 1:nrow(hyper_grid_RF_N_all)) {
+  
+  # train model
+  model_rf_N_all <- ranger(
+    formula         = Total_N ~., 
+    data            = boots_N, 
+    num.trees       = hyper_grid_RF_N_all$num.trees[i],
+    mtry            = hyper_grid_RF_N_all$mtry[i],
+    min.node.size   = hyper_grid_RF_N_all$node_size[i],
+    sample.fraction = .70,
+    seed            = 42
+  )
+  
+  # add OOB error to grid
+  hyper_grid_RF_N_all$OOB_RMSE[i] <- sqrt(model_rf_N_all$prediction.error)
+}
+
+hyper_grid_RF_N_all %>% 
+  dplyr::arrange(OOB_RMSE) %>%  
+  arrange(OOB_RMSE) %>%
+		  top_n(-10, wt = OOB_RMSE)
+		   mtry node_size num.trees   OOB_RMSE
+		1     6        20       450 0.05734655
+		2     6        20       400 0.05744362
+		3     6        20       350 0.05754543
+		4     6        20       500 0.05757628
+		5     6        20       550 0.05772640
+		6     6        20       600 0.05779241
+		7     6        20       750 0.05779379
+		8     6        20       800 0.05785096
+		9     6        20       650 0.05790813
+		10    6        20       700 0.05792204
+
+
+hyper_grid_RF_N_all <- expand.grid(
+  mtry       = seq(2, 6, by = 1),
+  node_size  = seq(10, 20, by = 1),
+  num.trees	 = seq(300, 1000, by = 50),
+  OOB_RMSE   = 0
+)
+
+for(i in 1:nrow(hyper_grid_RF_N_all)) {
+  
+  # train model
+  model_rf_N_all <- ranger(
+    formula         = Total_N ~., 
+    data            = boots_N, 
+    num.trees       = hyper_grid_RF_N_all$num.trees[i],
+    mtry            = hyper_grid_RF_N_all$mtry[i],
+    min.node.size   = hyper_grid_RF_N_all$node_size[i],
+    sample.fraction = .70,
+    seed            = 42
+  )
+  
+  # add OOB error to grid
+  hyper_grid_RF_N_all$OOB_RMSE[i] <- sqrt(model_rf_N_all$prediction.error)
+}
+
+hyper_grid_RF_N_all %>% 
+  dplyr::arrange(OOB_RMSE) %>%  
+  arrange(OOB_RMSE) %>%
+		  top_n(-10, wt = OOB_RMSE)
+		   mtry node_size num.trees   OOB_RMSE
+		1     6        10       450 0.03514125
+		2     6        10       400 0.03543903
+		3     6        10       550 0.03561238
+		4     6        10       500 0.03565311
+		5     6        10       600 0.03572105
+		6     6        10       350 0.03578552
+		7     6        10       650 0.03586587
+		8     6        10       700 0.03590324
+		9     6        10       750 0.03594965
+		10    6        10      1000 0.03598912
+
+RF_N_All_Final <- 	randomForest(
+  x 			= x_train_N_all,
+  y 			= y_train_N_all,
+  ntree   		= 450,
+  mtry			= 6,
+  nodesize		= 10,
+  importance	= TRUE)
+
+preds_RF_N_All_Final <- predict(RF_N_All_Final, test_N_all)
+
+modelEval_RF_N_All <- cbind(test_N_all$Total_N, preds_RF_N_All_Final)
+colnames(modelEval_RF_N_All) <- c('Actual', 'Predicted')
+modelEval_RF_N_All <- as.data.frame(modelEval_RF_N_All)
+
+mse_RF_N_All <- mean((modelEval_RF_N_All$Actual - modelEval_RF_N_All$Predicted)^2)
+rmse_RF_N_All <- sqrt(mse_RF_N_All)
+rmse_RF_N_All
+[1] 0.03182345
+
+mae_rf_N_All <- ModelMetrics::mae(y_test_N_all, preds_RF_N_All_Final)
+mae_rf_N_All
+[1] 0.01796658
+
+bias_rf_N_All <- Metrics::bias(y_test_N_all, preds_RF_N_All_Final)
+bias_rf_N_All
+[1] -0.001232658
+
+
+mtry <- sqrt(ncol(x_train_N_all))
+#ntree: Number of trees to grow.
+ntree <- 450
+
+					
+tunegrid_N1 <- expand.grid(.mtry = c(2:11)) 
+
+set.seed(123)
+RF_N_caret <- train(
+			x = x_train_N_all,
+			y = y_train_N_all,
+                   method = 'rf',
+                   metric = 'RMSE',
+                   tuneGrid = tunegrid_N1, 
+				   nodesize = 10,
+					ntree = 450,
+                   trControl = trainControl(method = "repeatedcv", number = 5, repeats=10))
+
+print(RF_N_caret) 
+		Random Forest 
+
+		428 samples
+		 12 predictor
+
+		No pre-processing
+		Resampling: Cross-Validated (5 fold, repeated 10 times) 
+		Summary of sample sizes: 342, 343, 342, 343, 342, 341, ... 
+		Resampling results across tuning parameters:
+
+		  mtry  RMSE        Rsquared   MAE       
+		   2    0.08441222  0.8268828  0.06369536
+		   3    0.06442719  0.8838862  0.04423287
+		   4    0.05729994  0.9032099  0.03681080
+		   5    0.05406729  0.9110487  0.03351039
+		   6    0.05229479  0.9150720  0.03163670
+		   7    0.05120266  0.9172645  0.03044325
+		   8    0.05074918  0.9176307  0.02969608
+		   9    0.05057803  0.9172444  0.02930991
+		  10    0.05028698  0.9173588  0.02900228
+		  11    0.05026296  0.9168714  0.02883075
+
+		RMSE was used to select the optimal model
+		 using the smallest value.
+		The final value used for the model was mtry = 11
+
+
+tunegrid_N2 <- expand.grid(.mtry = c(1:11)) 
+
+RF_N_caret2 <- train(
+					x = x_train_N_all,
+					y = y_train_N_all,
+					method = "rf", 
+					trControl = trainControl(method = "repeatedcv", number = 5, repeats=10), 
+					metric= "RMSE",
+					verbose = FALSE, 
+					tuneGrid = tunegrid_N2,
+					n.trees = c(1:50)*100) ## lebih unggul --> model final
+ 
+print(RF_N_caret2) 
+Random Forest 
+
+428 samples
+ 12 predictor
+
+No pre-processing
+Resampling: Cross-Validated (5 fold, repeated 10 times) 
+Summary of sample sizes: 343, 341, 343, 343, 342, 344, ... 
+Resampling results across tuning parameters:
+
+  mtry  RMSE        Rsquared   MAE       
+   1    0.12688479  0.6740116  0.10368597
+   2    0.07573208  0.8663975  0.05630060
+   3    0.05258006  0.9196468  0.03366297
+   4    0.04584237  0.9318957  0.02581993
+   5    0.04314190  0.9373063  0.02284787
+   6    0.04274970  0.9365657  0.02195077
+   7    0.04188688  0.9382277  0.02131388
+   8    0.04184189  0.9371715  0.02096358
+   9    0.04207426  0.9357992  0.02086294
+  10    0.04175868  0.9361920  0.02063978
+  11    0.04180122  0.9355733  0.02065629
+
+RMSE was used to select the optimal model using the smallest value.
+The final value used for the model was mtry = 10.
+
+RF_N_caret2$finalModel$ntree
+[1] 500
+
+res_RF <- resamples(list(RF1 = RF_N_caret, RF2 = RF_N_caret2))
+	
+scales_RF <- list(x=list(relation="free"), y=list(relation="free"))
+
+bwplot(res_RF, scales=scales_RF)
+
+ggplot(res_RF, scales=scales_RF)
+
+res_RF$values %>% #extract the values
+  select(1, ends_with("Rsquared")) %>% #select the first column and all columns with a name ending with "Rsquared"
+  gather(model, Rsquared, -1) %>% #convert to long table
+  mutate(model = sub("~Rsquared", "", model)) %>% #leave just the model names
+  ggplot()+ #call ggplot
+  geom_boxplot(aes(x = Rsquared, y = model, fill=model)) -> plotres_RF #and plot the box plot
+
+plot_res_RF<- plotres_RF + scale_y_discrete(limits = c("RF1", "RF2"))+
+    scale_fill_viridis(discrete = TRUE) + theme_bw()  + 
+	theme(text=element_text(size=13, family="Palatino"),
+	axis.title.y=element_blank())+theme( legend.position="none") ## kesimpulan: RF2 lebih unggul
+
+plot_res_RF
+
+
+## Gradient Boosting Machine
+
+grid_gbm <-expand.grid(n.trees = seq(50, 1000, by = 50),
+			interaction.depth = c(1, 3, 5), 
+			shrinkage = c(.01, .1, .3, .5),
+			n.minobsinnode = c(3, 5, 7))
+			
+
+set.seed(1234)
+gbm_N_All_caret1 <- train(
+	x 		= x_train_N_all,
+	y 		= y_train_N_all,
+	method 	= "gbm",
+	metric 	= "RMSE",
+	trControl = trainControl(method = "repeatedcv", number = 5, repeats=10),
+	tuneGrid = grid_gbm,
+	verbose = FALSE
+)
+
+gbm_N_All_caret1$bestTune
+    n.trees interaction.depth
+540    1000                 5
+    shrinkage n.minobsinnode
+540       0.3              7
+
+modelEval_GBM_N_All_caret1 <- cbind(test_N_all$Total_N, preds_GBM_N_All_caret1)
+colnames(modelEval_GBM_N_All_caret1) <- c('Actual', 'Predicted')
+modelEval_GBM_N_All_caret1 <- as.data.frame(modelEval_GBM_N_All_caret1)
+
+mse_GBM_N_All_caret1 <- mean((modelEval_GBM_N_All_caret1$Actual - modelEval_GBM_N_All_caret1$Predicted)^2)
+rmse_GBM_N_All_caret1 <- sqrt(mse_GBM_N_All_caret1)
+rmse_GBM_N_All_caret1
+0.1570354
+
+grid_gbm2 <-expand.grid(n.trees = seq(500, 5000, by = 500),
+			interaction.depth = c(3, 5, 7), 
+			shrinkage = 0.3,
+			n.minobsinnode = 7)
+			
+
+set.seed(1234)
+gbm_N_All_caret2 <- train(
+	x 		= x_train_N_all,
+	y 		= y_train_N_all,
+	method 	= "gbm",
+	metric 	= "RMSE",
+	trControl = trainControl(method = "repeatedcv", number = 5, repeats=10),
+	tuneGrid = grid_gbm2,
+	verbose = FALSE
+)
+
+gbm_N_All_caret2$bestTune
+   n.trees interaction.depth
+15    2500                 5
+   shrinkage n.minobsinnode
+15       0.3              7
+
+modelEval_GBM_N_All_caret1 <- cbind(test_N_all$Total_N, preds_GBM_N_All_caret1)
+colnames(modelEval_GBM_N_All_caret1) <- c('Actual', 'Predicted')
+modelEval_GBM_N_All_caret1 <- as.data.frame(modelEval_GBM_N_All_caret1)
+
+mse_GBM_N_All_caret1 <- mean((modelEval_GBM_N_All_caret1$Actual - modelEval_GBM_N_All_caret1$Predicted)^2)
+rmse_GBM_N_All_caret1 <- sqrt(mse_GBM_N_All_caret1)
+rmse_GBM_N_All_caret1
+0.1570354
+
+grid_gbm3 <-expand.grid(n.trees = seq(20, 100, by = 5),
+			interaction.depth = 3, 
+			shrinkage = seq(.01, 1, by = .05),
+			n.minobsinnode = 7)
+			
+
+set.seed(1234)
+gbm_N_All_caret3 <- train(
+	x 		= x_train_N_all,
+	y 		= y_train_N_all,
+	method 	= "gbm",
+	metric 	= "RMSE",
+	trControl = trainControl(method = "repeatedcv", number = 5, repeats=10),
+	tuneGrid = grid_gbm3,
+	verbose = FALSE
+)
+
+gbm_N_All_caret3$bestTune
+    n.trees interaction.depth shrinkage n.minobsinnode
+103      20                 3      0.31             15
+
+
+
+
+grid_gbm4 <-expand.grid(n.trees = seq(20, 50, by = 2),
+			interaction.depth = 3, 
+			shrinkage = seq(.01, ,2, by = .01),
+			n.minobsinnode = 7)
+			
+
+set.seed(1234)
+gbm_N_All_caret4 <- train(
+	x 		= x_train_N_all,
+	y 		= y_train_N_all,
+	method 	= "gbm",
+	metric 	= "RMSE",
+	trControl = trainControl(method = "repeatedcv", number = 5, repeats=10),
+	tuneGrid = grid_gbm4,
+	verbose = FALSE
+)
+
+gbm_N_All_caret4$bestTune
+    n.trees interaction.depth shrinkage
+174      44                 3      0.11
+    n.minobsinnode
+174             15
+
+res_GBM <- resamples(list(GBM1 = gbm_N_All_caret1, GBM2 = gbm_N_All_caret2)) #, GBM3 = gbm_N_All_caret3, GBM4 = gbm_N_All_caret4))
+	
+scales2 <- list(x=list(relation="free"), y=list(relation="free"))
+bwplot(res_GBM, scales=scales2)
+
+ggplot(res_GBM, scales=scales2)
+
+res_GBM$values %>% #extract the values
+  select(1, ends_with("Rsquared")) %>% #select the first column and all columns with a name ending with "Rsquared"
+  gather(model, Rsquared, -1) %>% #convert to long table
+  mutate(model = sub("~Rsquared", "", model)) %>% #leave just the model names
+  ggplot()+ #call ggplot
+  geom_boxplot(aes(x = Rsquared, y = model, fill=model)) -> plotres_GBM #and plot the box plot
+
+plot_res_GBM <- plotres_GBM + scale_y_discrete(limits = c("GBM1", "GBM2"))+ ##,"GBM3", "GBM4"))+
+    scale_fill_viridis(discrete = TRUE) + theme_bw()  + 
+	theme(text=element_text(size=13, family="Palatino"),
+	axis.title.y=element_blank())+theme( legend.position="none") ##GBM1 lebih unggul
+
+plot_res_GBM
+
+#Final Model GBM
+
+
+
+grid_gbm_final <-expand.grid(n.trees = 20,
+			interaction.depth = 3, 
+			shrinkage = seq(.01, 1, by = .05),
+			n.minobsinnode = 15)
+			
+
+set.seed(1234)
+gbm_N_All_caret_final <- train(
+	x 		= x_train_N_all,
+	y 		= y_train_N_all,
+	method 	= "gbm",
+	metric 	= "RMSE",
+	trControl = trainControl(method = "repeatedcv", number = 5, repeats=10),
+	tuneGrid = grid_gbm_final
+)
+
+gbm_N_All_caret_final$bestTune
+
+
+preds_GBM_N_All_caret1 <- predict(gbm_N_All_caret_final, test_N_all)
+
+modelEval_GBM_N_All_caret1 <- cbind(test_N_all$Total_N, preds_GBM_N_All_caret1)
+colnames(modelEval_GBM_N_All_caret1) <- c('Actual', 'Predicted')
+modelEval_GBM_N_All_caret1 <- as.data.frame(modelEval_GBM_N_All_caret1)
+
+mse_GBM_N_All_caret1 <- mean((modelEval_GBM_N_All_caret1$Actual - modelEval_GBM_N_All_caret1$Predicted)^2)
+rmse_GBM_N_All_caret1 <- sqrt(mse_GBM_N_All_caret1)
+rmse_GBM_N_All_caret1
+0.1570354
+
+mae_gbm_N_All <- ModelMetrics::mae(y_test_N_all, preds_GBM_N_All_caret1)
+mae_gbm_N_All
+0.1294637
+
+bias_gbm_N_All <- Metrics::bias(y_test_N_all, preds_GBM_N_All_caret1)
+bias_gbm_N_All
+-0.04124569
+
+
+
+## extreeme gradient boosting
+
+xgb_trc_N_All = trainControl(
+  method = "repeatedcv",
+  number = 5,  
+  repeats = 10,
+  allowParallel = TRUE,
+  verboseIter = FALSE,
+  returnData = FALSE
+)
+
+xgbGrid_N_All <- expand.grid(
+		nrounds = 100,
+		max_depth = 6,
+		eta = 0.3,
+		gamma = 0,
+		colsample_bytree = 1,
+		min_child_weight = 1,
+		subsample = 1
+)##default -->  RMSE = 0.20
+
+# Fixing nround, learning rate (eta), max tree depth
+xgb_trc_N_All = trainControl(
+  method = "repeatedcv",
+  number = 5,  
+  #repeats = 10, ## dihilangkan buat menambah kecepatan
+  allowParallel = TRUE,
+  verboseIter = FALSE,
+  returnData = FALSE
+)
+
+
+nrounds <- 1000
+xgbGrid_N_All <- expand.grid(
+  nrounds = seq(from = 200, to = nrounds, by = 50),
+  eta = c(0.025, 0.05, 0.1, 0.3),
+  max_depth = c(2, 3, 4, 5, 6),
+  gamma = 0,
+  colsample_bytree = 1,
+  min_child_weight = 1,
+  subsample = 1
+)
+
+
+set.seed(42) 
+xgb_N_All = train(
+	x 		= x_train_N_all,
+	y 		= y_train_N_all, 
+  trControl = xgb_trc_N_All,
+  tuneGrid = xgbGrid_N_All,
+  method = "xgbTree",
+  metric = 'RMSE',
+  verbosity = 0
+)
+
+# helper function for the plots
+tuneplot <- function(x, probs = .90) {
+  ggplot(x) +
+    coord_cartesian(ylim = c(quantile(x$results$RMSE, probs = probs), min(x$results$RMSE))) +
+    theme_bw()
+}
+
+tuneplot(xgb_N_All)
+
+xgb_N_All_fix <- xgb_N_All$bestTune
+xgb_N_All_fix 
+    nrounds max_depth eta gamma
+239     200         6 0.1     0
+    colsample_bytree
+239                1
+    min_child_weight subsample
+239                1         1
+
+
+# Fixing max child weight and (a bit) nrounds
+
+nrounds <- 200
+xgbGrid_N_All <- expand.grid(
+  nrounds = seq(from = 20, to = nrounds, by = 20),
+  eta = c(0.1, 0.3),
+  max_depth = c(5, 6),
+  gamma = 0,
+  colsample_bytree = 1,
+  min_child_weight = c(1,2,3),
+  subsample = 1
+)
+
+set.seed(42) 
+xgb_N_All = train(
+	x 		= x_train_N_all,
+	y 		= y_train_N_all, 
+  trControl = xgb_trc_N_All,
+  tuneGrid = xgbGrid_N_All,
+  method = "xgbTree",
+  metric = 'RMSE',
+  verbosity = 0
+)
+
+# helper function for the plots
+tuneplot <- function(x, probs = .90) {
+  ggplot(x) +
+    coord_cartesian(ylim = c(quantile(x$results$RMSE, probs = probs), min(x$results$RMSE))) +
+    theme_bw()
+}
+
+tuneplot(xgb_N_All)
+
+xgb_N_All_fix <- xgb_N_All$bestTune
+
+xgb_N_All_fix
+   nrounds max_depth eta gamma
+40     200         6 0.1     0
+   colsample_bytree min_child_weight
+40                1                1
+   subsample
+40         1
+
+
+# Fixing colsample bytree and subsampling (or column and row sampling = subspace sampling), 
+xgb_trc_N_All = trainControl(
+  method = "repeatedcv",
+  number = 5,  
+  #repeats = 10, ## dihilangkan buat menambah kecepatan
+  allowParallel = TRUE,
+  verboseIter = FALSE,
+  returnData = FALSE
+)
+
+nrounds <- 250
+xgbGrid_N_All <- expand.grid(
+  nrounds = seq(from = 20, to = nrounds, by = 10),
+  eta = c(0.1),
+  max_depth = c(6),
+  gamma = 0,
+  colsample_bytree = c(0.4, 0.6, 0.8, 1.0),
+  min_child_weight = c(1,2),
+  subsample = c(0.5, 0.75, 1.0)
+)
+
+set.seed(42) 
+xgb_N_All = train(
+	x 		= x_train_N_all,
+	y 		= y_train_N_all, 
+  trControl = xgb_trc_N_All,
+  tuneGrid = xgbGrid_N_All,
+  method = "xgbTree",
+  metric = 'RMSE',
+  verbosity = 0
+)
+
+# helper function for the plots
+tuneplot <- function(x, probs = .90) {
+  ggplot(x) +
+    coord_cartesian(ylim = c(quantile(x$results$RMSE, probs = probs), min(x$results$RMSE))) +
+    theme_bw()
+}
+
+tuneplot(xgb_N_All, probs = .95)
+
+xgb_N_All_fix <- xgb_N_All$bestTune
+
+xgb_N_All_fix
+    nrounds max_depth eta gamma
+498     190         6 0.1     0
+    colsample_bytree
+498                1
+    min_child_weight subsample
+498                1         1
+
+#final thoughts
+## nrounds (tree) tidak stabil sebelum 100
+## beberapa hyperparams perlu di detilkan
+
+# subfinal XGB model
+xgb_trc_N_All = trainControl(
+  method = "repeatedcv",
+  number = 5,  
+  repeats = 10, 
+  allowParallel = TRUE,
+  verboseIter = FALSE,
+  returnData = FALSE
+)
+
+nrounds <- 200
+xgbGrid_N_All <- expand.grid(
+  nrounds = seq(from = 80, to = nrounds, by = 10),
+  eta = 0.1,
+  max_depth = 6,
+  gamma = 0,
+  colsample_bytree = c(0.8, 1),
+  min_child_weight = c(1),
+  subsample = c( 0.75,1)
+)
+
+
+set.seed(42) 
+xgb_N_All = train(
+	x 		= x_train_N_all,
+	y 		= y_train_N_all, 
+  trControl = xgb_trc_N_All,
+  tuneGrid = xgbGrid_N_All,
+  method = "xgbTree",
+  metric = 'RMSE',
+  verbosity = 0
+)
+
+# helper function for the plots
+tuneplot <- function(x, probs = .90) {
+  ggplot(x) +
+    coord_cartesian(ylim = c(quantile(x$results$RMSE, probs = probs), min(x$results$RMSE))) +
+    theme_bw()
+}
+
+tuneplot(xgb_N_All, probs = .95)
+
+xgb_N_All_fix <- xgb_N_All$bestTune
+   nrounds max_depth   eta gamma colsample_bytree
+54     160         2 0.025     0              0.4
+   min_child_weight subsample
+54                2       0.5
+
+# final XGB model
+xgb_trc_N_All = trainControl(
+  method = "repeatedcv",
+  number = 5,  
+  repeats = 10, 
+  allowParallel = TRUE,
+  verboseIter = FALSE,
+  returnData = FALSE
+)
+
+nrounds <- 250
+xgbGrid_N_All <- expand.grid(
+  nrounds = seq(from = 150, to = nrounds, by = 10),
+  eta = c(0.1),
+  max_depth = c(6),
+  gamma = 0,
+  colsample_bytree = c(1),
+  min_child_weight = c(1),
+  subsample = c(0.75)
+)
+
+
+set.seed(42) 
+xgb_N_All = train(
+	x 		= x_train_N_all,
+	y 		= y_train_N_all, 
+  trControl = xgb_trc_N_All,
+  tuneGrid = xgbGrid_N_All,
+  method = "xgbTree",
+  metric = 'RMSE',
+  verbosity = 0
+)
+
+xgb_N_All_fix <- xgb_N_All$bestTune
+		   nrounds max_depth eta gamma
+		11     250         6 0.1     0
+		   colsample_bytree min_child_weight
+		11                1                1
+		   subsample
+		11      0.75
+
+preds_XGB_N_All_Final <- predict(xgb_N_All, as.matrix(x_test_N_all))
+
+modelEval_XGB_N_All <- cbind(y_test_N_all, preds_XGB_N_All_Final)
+colnames(modelEval_XGB_N_All) <- c('Actual', 'Predicted')
+modelEval_XGB_N_All <- as.data.frame(modelEval_XGB_N_All)
+
+mse_XGB_N_All <- mean((modelEval_XGB_N_All$Actual - modelEval_XGB_N_All$Predicted)^2)
+rmse_XGB_N_All <- sqrt(mse_XGB_N_All)
+rmse_XGB_N_All
+0.0005390032
+
+mae_XGB_N_All <- ModelMetrics::mae(y_test_N_all, preds_XGB_N_All_Final)
+mae_XGB_N_All
+0.0003536574
+
+bias_XGB_N_All <- Metrics::bias(y_test_N_all, preds_XGB_N_All_Final)
+bias_XGB_N_All
+1.584796e-05
+
+#visualise model agreement
+# 1 by calobration (internally computed k-folds CV)
+
+models_compare_N <- resamples(list(LM=MLR_N_All, LogGLM=tuned_log_N_All, MARS=tuned_mars_N_All, 
+									RF=RF_N_caret2, GBM=gbm_N_All_caret1, XGB=xgb_N_All ))
+
+# Summary of the models performances
+
+summary(models_compare_N)
+	Call:
+	summary.resamples(object = models_compare_N)
+
+	Models: LM, LogGLM, MARS, RF, GBM, XGB 
+	Number of resamples: 50 
+
+	MAE 
+				   Min.     1st Qu.      Median        Mean     3rd Qu.       Max. NAs
+	LM     1.111524e-01 0.119024719 0.123362026 0.122805391 0.127173633 0.13502562    0
+	LogGLM 1.062038e-01 0.117333984 0.123265685 0.122507307 0.128580436 0.13918809    0
+	MARS   9.208832e-02 0.117723525 0.127226927 0.127910722 0.137957731 0.16802947    0
+	RF     1.225301e-02 0.017356095 0.019777305 0.020639782 0.023441564 0.03840173    0
+	GBM    5.903660e-07 0.001200799 0.003776432 0.004499989 0.006202918 0.01843910    0
+	XGB    3.909269e-04 0.002417470 0.004851253 0.005251832 0.007645372 0.01606394    0
+
+	RMSE 
+				   Min.     1st Qu.     Median       Mean    3rd Qu.       Max. NAs
+	LM     1.333948e-01 0.142038015 0.14805461 0.14751556 0.15294462 0.16643908    0
+	LogGLM 1.307378e-01 0.141153482 0.14587557 0.14665543 0.15350445 0.16511682    0
+	MARS   1.138333e-01 0.149584487 0.16174643 0.15956361 0.16959208 0.20017302    0
+	RF     2.061679e-02 0.032243212 0.03891118 0.04175868 0.05048011 0.08937056    0
+	GBM    1.108962e-06 0.009133458 0.01859593 0.02500824 0.03617133 0.08092823    0
+	XGB    6.140045e-04 0.010324617 0.02964260 0.02618926 0.03647032 0.08004426    0
+
+	Rsquared 
+				  Min.    1st Qu.    Median      Mean   3rd Qu.      Max. NAs
+	LM     0.082746838 0.19353512 0.2224243 0.2381227 0.2733010 0.4441314    0
+	LogGLM 0.034773111 0.19213264 0.2454219 0.2467743 0.2965028 0.4345559    0
+	MARS   0.001186059 0.05877921 0.1564175 0.1849669 0.2581902 0.5852437    0
+	RF     0.684317176 0.91762845 0.9531152 0.9361920 0.9703301 0.9904744    0
+	GBM    0.758919837 0.95336296 0.9877005 0.9626732 0.9968686 1.0000000    0
+	XGB    0.798464144 0.95492912 0.9696758 0.9654385 0.9964374 0.9999872    0
+
+
+scales <- list(x=list(relation="free"), y=list(relation="free"))
+bwplot(models_compare_N, scales=scales)
+
+ggplot(models_compare_N, scales=scales)
+
+models_compare_N$values %>% #extract the values
+  select(1, ends_with("RMSE")) %>% #select the first column and all columns with a name ending with "RMSE"
+  gather(model, RMSE, -1) %>% #convert to long table
+  mutate(model = sub("~RMSE", "", model)) %>% #leave just the model names
+  ggplot()+ #call ggplot
+  geom_boxplot(aes(x = RMSE, y = model, fill=model)) -> plotN1 #and plot the box plot
+
+plotN1_fix <- plotN1 + scale_y_discrete(limits = c("LM", "LogGLM", "MARS", "RF", "GBM", "XGB"))+
+    scale_colour_brewer(palette = "Oranges") + theme_bw()  + 
+	theme(text=element_text(size=13, family="Palatino"),
+	axis.title.y=element_blank())+theme( legend.position="none")
+
+models_compare_N$values %>% #extract the values
+  select(1, ends_with("MAE")) %>% #select the first column and all columns with a name ending with "MAE"
+  gather(model, MAE, -1) %>% #convert to long table
+  mutate(model = sub("~MAE", "", model)) %>% #leave just the model names
+  ggplot()+ #call ggplot
+  geom_boxplot(aes(x = MAE, y = model, fill=model)) -> plotN2 #and plot the box plot
+
+plotN2_fix <- plotN2 + scale_y_discrete(limits = c("LM", "LogGLM", "MARS", "RF", "GBM", "XGB"))+
+    scale_colour_brewer(palette = "Oranges")  + theme_bw()  + 
+	theme(text=element_text(size=13, family="Palatino"),
+	axis.title.y=element_blank(),
+	axis.text.y=element_blank())+theme( legend.position="none")
+
+models_compare_N$values %>% #extract the values
+  select(1, ends_with("Rsquared")) %>% #select the first column and all columns with a name ending with "Rsquared"
+  gather(model, Rsquared, -1) %>% #convert to long table
+  mutate(model = sub("~Rsquared", "", model)) %>% #leave just the model names
+  ggplot()+ #call ggplot
+  geom_boxplot(aes(x = Rsquared, y = model, fill=model)) -> plotN3 #and plot the box plot
+
+plotN3_fix <- plotN3 + scale_y_discrete(limits = c("LM", "LogGLM", "MARS", "RF", "GBM", "XGB"))+
+    scale_colour_brewer(palette = "Oranges")  + theme_bw() + 
+	theme(text=element_text(size=13, family="Palatino"),
+	axis.title.y=element_blank(),
+	axis.text.y=element_blank())+theme( legend.position="none")
+
+
+plotN1_fix+plotN2_fix+plotN3_fix
+
+
+#performance by validation method
+
+# 2 by validation (externally by the 30% validation data)
+
+									
+preds_MLR_N_All1 <- predict(MLR_N_All, test_N_all)
+preds_LOG_GLM_N_All1 <- predict(tuned_log_N_All, test_N_all)
+preds_MARS_N_All1 <- predict(tuned_mars_N_All, test_N_all)
+preds_RF_N_All_Final1 <- predict(RF_N_caret2, test_N_all)
+preds_GBM_N_All1 <- predict(gbm_N_All_caret1, test_N_all)
+preds_XGB_N_All_Final1 <- predict(xgb_N_All, as.matrix(x_test_N_all))
+
+
+MLR_df_p <- data.frame(	Rsq = R2(preds_MLR_N_All1, y_test_N_all),  
+						RMSE = RMSE(preds_MLR_N_All1, y_test_N_all),  
+						MAE = MAE(preds_MLR_N_All1, y_test_N_all),
+						BIAS = Metrics::bias(y_test_N_all, preds_MLR_N_All1)) %>% add_column(Model="MLR")
+
+
+LogGLM_df_p <- data.frame(	Rsq = R2(preds_LOG_GLM_N_All1, y_test_N_all),  
+						RMSE = RMSE(preds_LOG_GLM_N_All1, y_test_N_all),  
+						MAE = MAE(preds_LOG_GLM_N_All1, y_test_N_all),
+						BIAS = Metrics::bias(y_test_N_all, preds_LOG_GLM_N_All1))%>% add_column(Model="LogGLM")
+
+MARS_df_p <- data.frame(Rsq = R2(preds_MARS_N_All1, y_test_N_all),  
+						RMSE = RMSE(preds_MARS_N_All1, y_test_N_all),  
+						MAE = MAE(preds_MARS_N_All1, y_test_N_all),
+						BIAS = Metrics::bias(y_test_N_all, preds_MARS_N_All1))%>% add_column(Model="MARS")
+
+names(MARS_df_p)[names(MARS_df_p) == 'y'] <- 'Rsq'
+
+
+RF_df_p <- data.frame(	Rsq = R2(preds_RF_N_All_Final1, y_test_N_all),  
+						RMSE = RMSE(preds_RF_N_All_Final1, y_test_N_all),  
+						MAE = MAE(preds_RF_N_All_Final1, y_test_N_all),
+						BIAS = Metrics::bias(y_test_N_all, preds_RF_N_All_Final1))%>% add_column(Model="RF")
+						
+GBM_df_p <- data.frame(	Rsq = R2(preds_GBM_N_All1, y_test_N_all),  
+						RMSE = RMSE(preds_GBM_N_All1, y_test_N_all),  
+						MAE = MAE(preds_GBM_N_All1, y_test_N_all),
+						BIAS = Metrics::bias(y_test_N_all, preds_GBM_N_All1))	%>% add_column(Model="GBM")					
+						
+XGB_df_p <- data.frame(	Rsq = R2(preds_XGB_N_All_Final1, y_test_N_all),  
+						RMSE = RMSE(preds_XGB_N_All_Final1, y_test_N_all),  
+						MAE = MAE(preds_XGB_N_All_Final1, y_test_N_all),
+						BIAS = Metrics::bias(y_test_N_all, preds_XGB_N_All_Final1))	%>% add_column(Model="XGB")					
+						
+
+merged_all_model <- bind_rows(MLR_df_p, LogGLM_df_p,MARS_df_p, RF_df_p,GBM_df_p, XGB_df_p)
+merged_all_model 
+        Rsq         RMSE          MAE          BIAS  Model
+1 0.2438232 1.476711e-01 1.229203e-01  1.956961e-03    MLR
+2 0.2476684 1.472854e-01 1.227592e-01  1.846029e-03 LogGLM
+3 0.1680866 1.548442e-01 1.259271e-01  1.894043e-04   MARS
+4 0.9925310 1.616489e-02 7.672455e-03 -6.318401e-04     RF
+5 1.0000000 8.411697e-07 4.357081e-07 -2.068036e-08    GBM
+6 0.9999924 5.390032e-04 3.536574e-04  1.584796e-05    XGB
+
+#local interpretation
+
+shap_mlr <- fastshap::explain(
+  MLR_N_All, 
+  X = X_df_train,
+  nsim = 1000, 
+  pred_wrapper = predict,
+  shap_only = FALSE,
+  adjust = TRUE
+)
+
+sv_LM <- shapviz(shap_mlr)
+sv_LM_wtf <- sv_waterfall(sv_LM, row_id = 3, fill_colors=c('#FF0051', '#008BFB')) +ggtitle("LM, row_id=3")+
+							theme(text=element_text(size=14,family="Palatino"),
+							axis.title.x=element_blank())
+sv_LM_wtf$mapping$linetype <- NA
+
+	
+shap_LogGLM <- fastshap::explain(
+  tuned_log_N_All, 
+  X = X_df_train,
+  nsim = 1000, 
+  pred_wrapper = predict,
+  shap_only = FALSE,
+  adjust = TRUE
+)
+
+sv_LogGLM <- shapviz(shap_LogGLM)
+sv_LogGLM_wtf <- sv_waterfall(sv_LogGLM, row_id = 3, fill_colors=c('#FF0051', '#008BFB')) +ggtitle("LogGLM, row_id=3")+
+							theme(text=element_text(size=14,family="Palatino"),
+							axis.title.x=element_blank())							
+sv_LogGLM_wtf$mapping$linetype <- NA
+
+sv_LogGLM_wtf2 <- sv_waterfall(sv_LogGLM, row_id = 100, fill_colors=c('#FF0051', '#008BFB')) +ggtitle("LogGLM, row_id=100")+
+							theme(text=element_text(size=14,family="Palatino"))
+														
+sv_LogGLM_wtf2$mapping$linetype <- NA
+
+
+X_df_train_mars <- data.frame(subset(X_df_train, select = Depth) %>% as.matrix() )
+shap_MARS <- fastshap::explain(
+  tuned_mars_N_All, 
+  X = X_df_train_mars,
+  nsim = 1000, 
+  pred_wrapper = predict,
+  shap_only = FALSE,
+  adjust = TRUE
+)
+
+sv_MARS <- shapviz(shap_MARS)
+sv_MARS_wtf <- sv_waterfall(sv_MARS, row_id = 3, fill_colors=c('#FF0051', '#008BFB')) +ggtitle("MARS")+
+							theme(text=element_text(size=14,family="Palatino"))		
+
+shap_RF <- fastshap::explain(
+  RF_N_All_Final, 
+  X = X_df_train,
+  nsim = 1000, 
+  pred_wrapper = predict,
+  shap_only = FALSE,
+  adjust = TRUE
+)
+
+sv_RF <- shapviz(shap_RF)
+sv_RF_wtf <- sv_waterfall(sv_RF, row_id = 3, fill_colors=c('#FF0051', '#008BFB')) +ggtitle("RF, row_id=3")+
+							theme(text=element_text(size=14,family="Palatino"),
+							axis.title.x=element_blank())	
+sv_RF_wtf$mapping$linetype <- NA
+
+
+shap_GBM <- fastshap::explain(
+  gbm_N_All_caret1, 
+  X = X_df_train,
+  nsim = 1000, 
+  pred_wrapper = predict,
+  shap_only = FALSE,
+  adjust = TRUE
+)
+
+sv_GBM <- shapviz(shap_GBM)
+sv_GBM_wtf <- sv_waterfall(sv_GBM, row_id = 3, fill_colors=c('#FF0051', '#008BFB')) +ggtitle("GBM, row_id=3")+
+							theme(text=element_text(size=14,family="Palatino"),
+							axis.title.x=element_blank())	
+sv_GBM_wtf$mapping$linetype <- NA
+
+sv_GBM_wtf2 <- sv_waterfall(sv_GBM, row_id = 100, fill_colors=c('#FF0051', '#008BFB')) +ggtitle("GBM, row_id=100")+
+							theme(text=element_text(size=14,family="Palatino"))	
+sv_GBM_wtf2$mapping$linetype <- NA
+
+shap_XGB <- fastshap::explain(
+  xgb_N_All, 
+  X = X_df_train,
+  nsim = 1000, 
+  pred_wrapper = predict,
+  shap_only = FALSE,
+  adjust = TRUE
+)
+
+sv_XGB <- shapviz(shap_XGB)
+sv_XGB_wtf <- sv_waterfall(sv_XGB, row_id = 3, fill_colors=c('#FF0051', '#008BFB')) +ggtitle("XGB, row_id=3")+
+							theme(text=element_text(size=14,family="Palatino"))	
+sv_XGB_wtf$mapping$linetype <- NA
+
+sv_LM_wtf+sv_LogGLM_wtf+sv_RF_wtf+sv_GBM_wtf+sv_XGB_wtf+plot_layout(nrow=3)
+
+sv_LogGLM_wtf+sv_GBM_wtf+
+sv_LogGLM_wtf2+sv_GBM_wtf2+
+plot_layout(ncol=2)
+
+
+
+bee_LM <- sv_importance(sv_LM, kind = "beeswarm", show_numbers = FALSE, color_bar_title=NULL)+theme_bw()+ 
+							 ggtitle("LM")+
+							theme(axis.text = element_text(size = 13 ,family="Palatino"),
+							axis.title = element_text(size = 13 ,family="Palatino"),
+							axis.title.x=element_blank(),
+							axis.text.y=element_blank())
+							
+bee_LogGLM <- sv_importance(sv_LogGLM, kind = "beeswarm", show_numbers = FALSE)+
+							theme_bw()+ 
+							 ggtitle("LogGLM")+
+							theme(axis.text = element_text(size = 13 ,family="Palatino"),
+							axis.title = element_text(size = 13 ,family="Palatino"),
+							axis.title.x=element_blank(),
+							axis.text.y=element_blank())
+							
+bee_RF <- sv_importance(sv_RF, kind = "beeswarm", show_numbers = FALSE,  color_bar_title=NULL)+
+							theme_bw()+ 
+							 ggtitle("RF") +
+							theme(axis.text = element_text(size = 13 ,family="Palatino"),
+							axis.title = element_text(size = 13 ,family="Palatino"),
+							axis.title.x=element_blank(),
+							axis.text.y=element_blank()	)
+							
+bee_GBM <- sv_importance(sv_GBM, kind = "beeswarm", show_numbers = FALSE)+
+							theme_bw()+ 
+							 ggtitle("GBM")+
+							theme(axis.text = element_text(size = 13 ,family="Palatino"),
+							axis.title = element_text(size = 13 ,family="Palatino"),
+							axis.text.y=element_blank())
+							
+bee_XGB <- sv_importance(sv_XGB, kind = "beeswarm", show_numbers = FALSE)+
+							theme_bw()+ 
+							 ggtitle("XGB")+
+							theme(axis.text = element_text(size = 13 ,family="Palatino"),
+							axis.title = element_text(size = 13 ,family="Palatino"),
+							axis.text.y=element_blank())
+
+bee_LM+bee_LogGLM+bee_RF+bee_GBM+bee_XGB+plot_layout(nrow=3)
+
+
+bee_LogGLM+bee_GBM
+
+#importance (mean)
+
+svMean_LM <- sv_importance(sv_LM, kind = "bar", show_numbers = FALSE, color_bar_title=NULL, fill="#674ea7")+theme_bw()+ 
+							 ggtitle("LM")+ 
+							theme(axis.text = element_text(size = 13 ,family="Palatino"),
+							axis.title = element_text(size = 13 ,family="Palatino"),
+							axis.title.x=element_blank())
+							
+svMean_LogGLM <- sv_importance(sv_LogGLM, kind = "bar", show_numbers = FALSE,  color_bar_title=NULL, fill="#674ea7")+
+							theme_bw()+ 
+							 ggtitle("LogGLM")+
+							theme(axis.text = element_text(size = 13 ,family="Palatino"),
+							axis.title = element_text(size = 13 ,family="Palatino"),
+							axis.title.x=element_blank(),
+							axis.title.y=element_blank())							
+							
+svMean_RF <- sv_importance(sv_RF, kind = "bar", show_numbers = FALSE,  color_bar_title=NULL, fill="#674ea7")+
+							theme_bw()+ 
+							 ggtitle("RF") +
+							theme(axis.text = element_text(size = 13 ,family="Palatino"),
+							axis.title = element_text(size = 13 ,family="Palatino"),
+							axis.title.x=element_blank())
+							
+svMean_GBM <- sv_importance(sv_GBM, kind = "bar", show_numbers = FALSE, , fill="#674ea7")+
+							theme_bw()+ 
+							 ggtitle("GBM")+
+							theme(axis.text = element_text(size = 13 ,family="Palatino"),
+							axis.title = element_text(size = 13 ,family="Palatino"),
+							axis.title.y=element_blank())
+							
+svMean_XGB <- sv_importance(sv_XGB, kind = "bar", show_numbers = FALSE, , fill="#674ea7")+
+							theme_bw()+ 
+							 ggtitle("XGB")+
+							theme(axis.text = element_text(size = 13 ,family="Palatino"),
+							axis.title = element_text(size = 13 ,family="Palatino"),
+							axis.title.y=element_blank())
+
+svMean_LM+svMean_LogGLM+svMean_RF+svMean_GBM+svMean_XGB+plot_layout(nrow=3)
+
+
+svMean_LogGLM+bee_LogGLM+svMean_GBM+bee_GBM+plot_layout(nrow=2)
+
+
+
+
+## dependence plot
+
+
+dep_mlr_depth <- sv_dependence(sv_LM, v = "Depth")+
+						theme_bw()+ 
+							 ggtitle("LM")+
+							 labs(x = " Depth (cm)")+
+							theme(text = element_text(size = 13 ,family="Palatino"),
+							axis.title = element_text(size = 13 ,family="Palatino"))+
+							scale_color_continuous(guide = guide_colorbar(
+							ticks = FALSE, barheight = 10), type = "viridis")
+							
+dep_LogGLM_depth <- sv_dependence(sv_LogGLM, v = "Depth")+
+						theme_bw()+
+							 ggtitle("LogGLM")+
+							 labs(x = " Depth (cm)")+
+							theme(text = element_text(size = 13 ,family="Palatino"),
+							axis.title = element_text(size = 13 ,family="Palatino"),
+							axis.title.y=element_text(size = 13 ,family="Palatino"))+
+							scale_color_continuous(guide = guide_colorbar(
+							ticks = FALSE, barheight = 10), type = "viridis") 
+							
+dep_RF_depth <- sv_dependence(sv_RF, v = "Depth")+
+						theme_bw()+
+							 ggtitle("RF")+
+							 labs(x = " Depth (cm)")+
+							theme(text = element_text(size = 13 ,family="Palatino"),
+							axis.title = element_text(size = 13 ,family="Palatino"),
+							axis.title.y=element_blank())+
+							scale_color_continuous(guide = guide_colorbar(
+							ticks = FALSE, barheight = 10), type = "viridis")
+
+dep_GBM_depth <- sv_dependence(sv_GBM, v = "Depth")+
+						theme_bw()+
+							 ggtitle("GBM")+
+							 labs(x = " Depth (cm)")+
+							theme(text = element_text(size = 13 ,family="Palatino"),
+							axis.title = element_text(size = 13 ,family="Palatino"),
+							axis.title.y=element_blank())+
+							scale_color_continuous(guide = guide_colorbar(
+							ticks = FALSE, barheight = 10), type = "viridis")
+
+dep_XGB_depth <- sv_dependence(sv_XGB, v = "Depth")+
+						theme_bw()+
+							 ggtitle("XGB")+
+							 labs(x = " Depth (cm)")+
+							theme(text = element_text(size = 13 ,family="Palatino"),
+							axis.title = element_text(size = 13 ,family="Palatino"),
+							axis.title.y=element_blank())+
+							scale_color_continuous(guide = guide_colorbar(
+							ticks = FALSE, barheight = 10), type = "viridis")
+
+
+
+dep_mlr_depth+dep_LogGLM_depth+dep_RF_depth+dep_GBM_depth+dep_XGB_depth
+dep_LogGLM_depth+dep_GBM_depth
+
+dep_mlr_OC <- sv_dependence(sv_LM, v = "Org_C")+
+						theme_bw()+ 
+							 ggtitle("LM")+
+							 labs(x = " Organic C (%)")+
+							theme(text = element_text(size = 13 ,family="Palatino"),
+							axis.title = element_text(size = 13 ,family="Palatino"))+
+							scale_color_continuous(guide = guide_colorbar(
+							ticks = FALSE, barheight = 10), type = "viridis")				
+
+						
+dep_LogGLM_OC <- sv_dependence(sv_LogGLM, v = "Org_C")+
+						theme_bw()+
+				#			 ggtitle("")+
+							 labs(x = " Organic C (%)")+
+							theme(text = element_text(size = 13 ,family="Palatino"),
+							axis.title = element_text(size = 13 ,family="Palatino"),
+							axis.title.y=element_text(size = 13 ,family="Palatino"))+
+							scale_color_continuous(guide = guide_colorbar(
+							ticks = FALSE, barheight = 10), type = "viridis")
+							
+dep_RF_OC <- sv_dependence(sv_RF, v = "Org_C")+
+						theme_bw()+
+							 ggtitle("RF")+
+							 labs(x = " Organic C (%)")+
+							theme(text = element_text(size = 13 ,family="Palatino"),
+							axis.title = element_text(size = 13 ,family="Palatino"),
+							axis.title.y=element_blank())+
+							scale_color_continuous(guide = guide_colorbar(
+							ticks = FALSE, barheight = 10), type = "viridis")
+							
+dep_GBM_OC <- sv_dependence(sv_GBM, v = "Org_C")+
+						theme_bw()+
+				#			 ggtitle("")+
+							 labs(x = " Organic C (%)")+
+							theme(text = element_text(size = 13 ,family="Palatino"),
+							axis.title = element_text(size = 13 ,family="Palatino"),
+							axis.title.y=element_blank())+
+							scale_color_continuous(guide = guide_colorbar(
+							ticks = FALSE, barheight = 10), type = "viridis")
+
+dep_XGB_OC <- sv_dependence(sv_XGB, v = "Org_C")+
+						theme_bw()+
+							 ggtitle("XGB")+
+							 labs(x = " Organic C (%)")+
+							theme(text = element_text(size = 13 ,family="Palatino"),
+							axis.title = element_text(size = 13 ,family="Palatino"),
+							axis.title.y=element_blank())+
+							scale_color_continuous(guide = guide_colorbar(
+							ticks = FALSE, barheight = 10), type = "viridis")
+
+
+
+dep_mlr_OC+dep_LogGLM_OC+dep_RF_OC+dep_GBM_OC+dep_XGB_OC
+
+dep_LogGLM_depth+dep_GBM_depth+
+dep_LogGLM_OC+dep_GBM_OC
+
+
+dep_mlr_Total_Fe <- sv_dependence(sv_LM, v = "Total_Fe")+
+						theme_bw()+ 
+							 ggtitle("LM")+
+							 labs(x = " Total Fe (mg/kg)")+
+							theme(text = element_text(size = 13 ,family="Palatino"),
+							axis.title = element_text(size = 13 ,family="Palatino"))+
+							scale_color_continuous(guide = guide_colorbar(
+							ticks = FALSE, barheight = 10), type = "viridis")
+							
+dep_LogGLM_Total_Fe <- sv_dependence(sv_LogGLM, v = "Total_Fe")+
+						theme_bw()+
+						#	 ggtitle("")+
+							 labs(x = " Total Fe (mg/kg)")+
+							theme(text = element_text(size = 13 ,family="Palatino"),
+							axis.title = element_text(size = 13 ,family="Palatino"),
+							axis.title.y=element_text(size = 13 ,family="Palatino"))+
+							scale_color_continuous(guide = guide_colorbar(
+							ticks = FALSE, barheight = 10), type = "viridis") 
+							
+dep_RF_Total_Fe <- sv_dependence(sv_RF, v = "Total_Fe")+
+						theme_bw()+
+							 ggtitle("RF")+
+							 labs(x = " Total Fe (mg/kg)")+
+							theme(text = element_text(size = 13 ,family="Palatino"),
+							axis.title = element_text(size = 13 ,family="Palatino"),
+							axis.title.y=element_blank())+
+							scale_color_continuous(guide = guide_colorbar(
+							ticks = FALSE, barheight = 10), type = "viridis")
+
+dep_GBM_Total_Fe <- sv_dependence(sv_GBM, v = "Total_Fe")+
+						theme_bw()+
+					#		 ggtitle("")+
+							 labs(x = " Total Fe (mg/kg)")+
+							theme(text = element_text(size = 13 ,family="Palatino"),
+							axis.title = element_text(size = 13 ,family="Palatino"),
+							axis.title.y=element_blank())+
+							scale_color_continuous(guide = guide_colorbar(
+							ticks = FALSE, barheight = 10), type = "viridis")
+
+dep_XGB_Total_Fe <- sv_dependence(sv_XGB, v = "Total_Fe")+
+						theme_bw()+
+							 ggtitle("XGB")+
+							 labs(x = " Total Fe (mg/kg)")+
+							theme(text = element_text(size = 13 ,family="Palatino"),
+							axis.title = element_text(size = 13 ,family="Palatino"),
+							axis.title.y=element_blank())+
+							scale_color_continuous(guide = guide_colorbar(
+							ticks = FALSE, barheight = 10), type = "viridis")
+
+
+dep_mlr_Total_Fe+dep_LogGLM_Total_Fe+dep_RF_Total_Fe+dep_GBM_Total_Fe+dep_XGB_Total_Fe
+
+dep_LogGLM_depth+dep_GBM_depth+
+dep_LogGLM_OC+dep_GBM_OC +
+dep_LogGLM_Total_Fe+dep_GBM_Total_Fe+plot_layout(nrow=3)
+
+
+
+dep_mlr_BD <- sv_dependence(sv_LM, v = "BD")+
+						theme_bw()+ 
+							 ggtitle("LM")+
+							 labs(x = " BD (g/cm3)")+
+							theme(text = element_text(size = 13 ,family="Palatino"),
+							axis.title = element_text(size = 13 ,family="Palatino"))+
+							scale_color_continuous(guide = guide_colorbar(
+							ticks = FALSE, barheight = 10), type = "viridis")
+							
+dep_LogGLM_BD <- sv_dependence(sv_LogGLM, v = "BD")+
+						theme_bw()+
+				#			 ggtitle("LogGLM")+
+							 labs(x = " BD (g/cm3)")+
+							theme(text = element_text(size = 13 ,family="Palatino"),
+							axis.title = element_text(size = 13 ,family="Palatino"),
+							axis.title.y=element_text(size = 13 ,family="Palatino"))+
+							scale_color_continuous(guide = guide_colorbar(
+							ticks = FALSE, barheight = 10), type = "viridis") 
+							
+dep_RF_BD <- sv_dependence(sv_RF, v = "BD")+
+						theme_bw()+
+							 ggtitle("RF")+
+							 labs(x = " BD (g/cm3)")+
+							theme(text = element_text(size = 13 ,family="Palatino"),
+							axis.title = element_text(size = 13 ,family="Palatino"),
+							axis.title.y=element_blank())+
+							scale_color_continuous(guide = guide_colorbar(
+							ticks = FALSE, barheight = 10), type = "viridis")
+
+dep_GBM_BD <- sv_dependence(sv_GBM, v = "BD")+
+						theme_bw()+
+			#				 ggtitle("GBM")+
+							 labs(x = " BD (g/cm3)")+
+							theme(text = element_text(size = 13 ,family="Palatino"),
+							axis.title = element_text(size = 13 ,family="Palatino"),
+							axis.title.y=element_blank())+
+							scale_color_continuous(guide = guide_colorbar(
+							ticks = FALSE, barheight = 10), type = "viridis")
+
+dep_XGB_BD <- sv_dependence(sv_XGB, v = "BD")+
+						theme_bw()+
+							 ggtitle("XGB")+
+							 labs(x = " BD (g/cm3)")+
+							theme(text = element_text(size = 13 ,family="Palatino"),
+							axis.title = element_text(size = 13 ,family="Palatino"),
+							axis.title.y=element_blank())+
+							scale_color_continuous(guide = guide_colorbar(
+							ticks = FALSE, barheight = 10), type = "viridis")
+
+dep_mlr_BD+dep_LogGLM_BD+dep_RF_BD+dep_GBM_BD+dep_XGB_BD
+
+dep_LogGLM_depth+dep_GBM_depth+
+dep_LogGLM_OC+dep_GBM_OC +
+dep_LogGLM_Total_Fe+dep_GBM_Total_Fe+
+dep_LogGLM_BD+dep_GBM_BD +plot_layout(nrow=4)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
