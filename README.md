@@ -6,5 +6,5 @@
 #Author Pulunggono HB, Yusuf AM, Nurazizah LL, Zulfajrin M. 2023.
 
 #submitted to CELEBES Agricultural Journal https://ojs.untika.ac.id/index.php/faperta/
-
+#script in the "Main Code" folder
 #All values will be removed immediately after the manuscript is accepted 
