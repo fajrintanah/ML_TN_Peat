@@ -1667,14 +1667,13 @@ bee_LogGLM <- sv_importance(sv_LogGLM, kind = "beeswarm", show_numbers = FALSE)+
 							axis.title = element_text(size = 13 ,family="Palatino"),
 							axis.title.x=element_blank(),
 							axis.text.y=element_blank())
-
-bee_Cubist <- sv_importance(sv_Cubist, kind = "beeswarm", show_numbers = FALSE,  color_bar_title=NULL)+
+							
+bee_Cubist <- sv_importance(sv_Cubist, kind = "beeswarm", show_numbers = FALSE)+
 							theme_bw()+ 
 							 ggtitle("Cubist") +
 							theme(axis.text = element_text(size = 13 ,family="Palatino"),
 							axis.title = element_text(size = 13 ,family="Palatino"),
-							axis.title.x=element_blank(),
-							axis.text.y=element_blank()	)
+							axis.text.y=element_blank()	)						
 
 bee_RF <- sv_importance(sv_RF, kind = "beeswarm", show_numbers = FALSE,  color_bar_title=NULL)+
 							theme_bw()+ 
@@ -1689,7 +1688,8 @@ bee_GBM <- sv_importance(sv_GBM, kind = "beeswarm", show_numbers = FALSE)+
 							 ggtitle("GBM")+
 							theme(axis.text = element_text(size = 13 ,family="Palatino"),
 							axis.title = element_text(size = 13 ,family="Palatino"),
-							axis.text.y=element_blank())
+							axis.text.y=element_blank(),
+							axis.title.x=element_blank())
 							
 bee_XGB <- sv_importance(sv_XGB, kind = "beeswarm", show_numbers = FALSE)+
 							theme_bw()+ 
@@ -1698,12 +1698,12 @@ bee_XGB <- sv_importance(sv_XGB, kind = "beeswarm", show_numbers = FALSE)+
 							axis.title = element_text(size = 13 ,family="Palatino"),
 							axis.text.y=element_blank())
 
-bee_LM+bee_LogGLM+bee_Cubist+bee_RF+bee_GBM+bee_XGB+plot_layout(nrow=3)
+bee_LM+bee_LogGLM+bee_RF+bee_Cubist+bee_GBM+bee_XGB+plot_layout(nrow=3)
 
 
 bee_LogGLM+bee_GBM
 
-# Importance (mean) Plot
+#importance (mean)
 
 svMean_LM <- sv_importance(sv_LM, kind = "bar", show_numbers = FALSE, color_bar_title=NULL, fill="#674ea7")+theme_bw()+ 
 							 ggtitle("LM")+ 
@@ -1723,9 +1723,8 @@ svMean_Cubist <- sv_importance(sv_Cubist, kind = "bar", show_numbers = FALSE,  c
 							theme_bw()+ 
 							 ggtitle("Cubist") +
 							theme(axis.text = element_text(size = 13 ,family="Palatino"),
-							axis.title = element_text(size = 13 ,family="Palatino"),
-							axis.title.x=element_blank())
-
+							axis.title = element_text(size = 13 ,family="Palatino"))
+							
 svMean_RF <- sv_importance(sv_RF, kind = "bar", show_numbers = FALSE,  color_bar_title=NULL, fill="#674ea7")+
 							theme_bw()+ 
 							 ggtitle("RF") +
@@ -1738,7 +1737,8 @@ svMean_GBM <- sv_importance(sv_GBM, kind = "bar", show_numbers = FALSE, , fill="
 							 ggtitle("GBM")+
 							theme(axis.text = element_text(size = 13 ,family="Palatino"),
 							axis.title = element_text(size = 13 ,family="Palatino"),
-							axis.title.y=element_blank())
+							axis.title.y=element_blank(),
+							axis.title.x=element_blank())
 							
 svMean_XGB <- sv_importance(sv_XGB, kind = "bar", show_numbers = FALSE, , fill="#674ea7")+
 							theme_bw()+ 
@@ -1747,10 +1747,12 @@ svMean_XGB <- sv_importance(sv_XGB, kind = "bar", show_numbers = FALSE, , fill="
 							axis.title = element_text(size = 13 ,family="Palatino"),
 							axis.title.y=element_blank())
 
-svMean_LM+svMean_LogGLM+svMean_Cubist+svMean_RF+svMean_GBM+svMean_XGB+plot_layout(nrow=3)
+svMean_LM+svMean_LogGLM+svMean_RF+svMean_Cubist+svMean_GBM+svMean_XGB+plot_layout(nrow=3)
 
 
-svMean_LogGLM+bee_LogGLM+svMean_GBM+bee_GBM+plot_layout(nrow=2)
+svMean_LogGLM+bee_LogGLM+svMean_GBM+bee_GBM+
+svMean_Cubist+bee_Cubist+plot_layout(nrow=3)
+
 
 
 
