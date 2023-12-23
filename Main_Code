@@ -1605,6 +1605,7 @@ sv_XGB <- shapviz(shap_XGB)
 
 ## Waterfall Plot
 
+# esplanation at row_id = 3
 sv_LM_wtf <- sv_waterfall(sv_LM, row_id = 3, fill_colors=c('#FF0051', '#008BFB')) +ggtitle("LM, row_id=3")+
 							theme(text=element_text(size=14,family="Palatino"),
 							axis.title.x=element_blank())
@@ -1616,8 +1617,7 @@ sv_LogGLM_wtf <- sv_waterfall(sv_LogGLM, row_id = 3, fill_colors=c('#FF0051', '#
 sv_LogGLM_wtf$mapping$linetype <- NA
 
 sv_Cubist_wtf <- sv_waterfall(sv_Cubist, row_id = 3, fill_colors=c('#FF0051', '#008BFB')) +ggtitle("CUBIST row_id=3")+
-							theme(text=element_text(size=14,family="Palatino"),
-							axis.title.x=element_blank())
+							theme(text=element_text(size=14,family="Palatino"))
 sv_Cubist_wtf$mapping$linetype <- NA
 
 sv_RF_wtf <- sv_waterfall(sv_RF, row_id = 3, fill_colors=c('#FF0051', '#008BFB')) +ggtitle("RF, row_id=3")+
@@ -1635,21 +1635,30 @@ sv_XGB_wtf <- sv_waterfall(sv_XGB, row_id = 3, fill_colors=c('#FF0051', '#008BFB
 sv_XGB_wtf$mapping$linetype <- NA
 
 
-sv_LM_wtf+sv_LogGLM_wtf+sv_RF_wtf+sv_GBM_wtf+sv_XGB_wtf+plot_layout(nrow=3)
+sv_LM_wtf+sv_LogGLM_wtf+sv_Cubist_wtf+sv_RF_wtf+sv_GBM_wtf+sv_XGB_wtf+plot_layout(nrow=3)
 
+#explanation at row_id = 100
 
 sv_LogGLM_wtf2 <- sv_waterfall(sv_LogGLM, row_id = 100, fill_colors=c('#FF0051', '#008BFB')) +ggtitle("LogGLM, row_id=100")+
-							theme(text=element_text(size=14,family="Palatino"))
+							theme(text=element_text(size=14,family="Palatino"),
+							axis.title.x=element_blank())
 														
 sv_LogGLM_wtf2$mapping$linetype <- NA
 
-sv_GBM_wtf2 <- sv_waterfall(sv_GBM, row_id = 100, fill_colors=c('#FF0051', '#008BFB')) +ggtitle("GBM, row_id=100")+
+sv_Cubist_wtf2 <- sv_waterfall(sv_Cubist, row_id = 100, fill_colors=c('#FF0051', '#008BFB')) +ggtitle("Cubist, row_id=100")+
 							theme(text=element_text(size=14,family="Palatino"))	
+sv_Cubist_wtf2$mapping$linetype <- NA
+
+sv_GBM_wtf2 <- sv_waterfall(sv_GBM, row_id = 100, fill_colors=c('#FF0051', '#008BFB')) +ggtitle("GBM, row_id=100")+
+							theme(text=element_text(size=14,family="Palatino"),
+							axis.title.x=element_blank())	
 sv_GBM_wtf2$mapping$linetype <- NA
 
-sv_LogGLM_wtf+sv_GBM_wtf+
-sv_LogGLM_wtf2+sv_GBM_wtf2+
+sv_LogGLM_wtf+sv_LogGLM_wtf2+
+sv_GBM_wtf+sv_GBM_wtf2+
+sv_Cubist_wtf+sv_Cubist_wtf2+
 plot_layout(ncol=2)
+
 
 ## Beeswarm Plot
 
