@@ -63,9 +63,10 @@ str(N_all_fix)
 		 $ BD      : num [1:120] 0.166 0.105 0.103 0.163 0.115 ...
 		 $ Total_Fe: num [1:120] 325 219 182 675 183 ...
 
-N_all_fix$Org_C <- N_all_fix$Org_C *100		 
-N_all_fix <- na.omit(N_all_fix)
+N_all_fix$Org_C <- N_all_fix$Org_C *100		#convert Org-C to percent value 
+N_all_fix <- na.omit(N_all_fix)			#omit missing values
 
+#other preprocessing had been done outside of R (resulting in N.A)
 str(N_all_fix)
 		tibble [109 × 13] (S3: tbl_df/tbl/data.frame)
 		 $ LU_OP   : num [1:109] 1 1 1 1 1 1 1 1 1 1 ...
@@ -86,7 +87,6 @@ str(N_all_fix)
 
 
 ## bootstrapping with replacement 
-
 boots_N <- N_all_fix %>% 
   bind_rows(
     N_all_fix %>% 
@@ -111,11 +111,11 @@ str(boots_N)
 		 - attr(*, "na.action")= 'omit' Named int [1:11] 9 21 40 43 49 55 56 57 58 93 ...
 		  ..- attr(*, "names")= chr [1:11] "9" "21" "40" "43" ...
 
+windowsFonts(Palatino=windowsFont("Palatino Linotype")) #setup font type to comply the Journal's font
 
-# Change background color to tiles in the upper triangular matrix of plots 
-windowsFonts(Palatino=windowsFont("Palatino Linotype"))
+# Correlation using ggally package
 
-N_all_fix_corr = subset(N_all_fix, select = -c(1:6))
+N_all_fix_corr = subset(N_all_fix, select = -c(1:6)) #subset to eliminate one-hot-encoded factors
 str(N_all_fix_corr)
 		tibble [109 × 7] (S3: tbl_df/tbl/data.frame)
 		 $ Depth   : num [1:109] 20 40 60 20 40 60 20 40 20 40 ...
@@ -127,7 +127,9 @@ str(N_all_fix_corr)
 		 $ Total_Fe: num [1:109] 325 219 182 675 183 ...
 		 - attr(*, "na.action")= 'omit' Named int [1:11] 9 21 40 43 49 55 56 57 58 93 ...
 		  ..- attr(*, "names")= chr [1:11] "9" "21" "40" "43" ...
-		  
+
+#build a custom function for more flexibility to adjust ggally
+
 my_fn_corr <- function(data, mapping, method="p", use="pairwise", ...){
 
               # grab data
@@ -149,13 +151,14 @@ my_fn_corr <- function(data, mapping, method="p", use="pairwise", ...){
                 theme(panel.background = element_rect(fill=fill))
             }
 
+#correlation using original dataset --> to appendix
 p1_corr <- ggpairs(N_all_fix_corr, 
                    upper = list(continuous = my_fn_corr),
                    lower = list(continuous = "smooth"))  			
 p1_corr+theme(text = element_text(size=11, family="Palatino"))			
 
-#correlation of boostrapped sampling
 
+#correlation using bootstrapped sampling --> to article body
 N_all_boot_corr = subset(boots_N, select = -c(1:6))
 
 p1_boot_corr <- ggpairs(N_all_boot_corr, 
@@ -164,11 +167,9 @@ p1_boot_corr <- ggpairs(N_all_boot_corr,
 p1_boot_corr+theme(text = element_text(size=11, family="Palatino"))	
 
 
-
-
 ## Modelling
 
-
+#sample split (70:30)
 set.seed(42)
 
 Split_N_all <- sample.split(Y=boots_N$Total_N, SplitRatio=0.7)
@@ -234,8 +235,6 @@ summary(test_N_all )
 
 
 ##visualize distribution 
-
-
 N_train <- train_N_all%>%
   add_column(Status = "Training")
 
@@ -247,7 +246,6 @@ N_df <- bind_rows(N_train, N_test)
 str(N_df)
 
 windowsFonts(Palatino=windowsFont("Palatino Linotype"))
-
 
 # Represent it
 plot_dist_N <- N_df %>% 
@@ -262,8 +260,6 @@ plot_dist_N <- N_df %>%
 				
 				
 plot_dist_N
-
-
 
 
 baru_N <-  N_df%>% subset(,-c(1:7))%>%
@@ -289,7 +285,6 @@ indvar_labeller1 <- function(variable,value){
   return(IndvarNames1[value])
 }
 
-
 # fungsi eliminasi outlier, passing ke stat_summary ggplot2
 
 calc_stat1 <- function(x) {
@@ -300,9 +295,6 @@ calc_stat1 <- function(x) {
   names(stats) <- c("ymin", "lower", "middle", "upper", "ymax")
   return(stats)
 }
-
-
-windowsFonts(Times=windowsFont("Times New Roman"))		
 
 boxplot_N <- baru_N %>%
 				ggplot(aes(x=Property, y=value, fill=Status)) +
@@ -318,11 +310,10 @@ boxplot_N <- baru_N %>%
 
 boxplot_N
 
+plot_dist_N+boxplot_N+plot_layout(ncol=1) #merge total N distribution to covariate's boxplots
 
-plot_dist_N+boxplot_N+plot_layout(ncol=1)
 
-
-##modeling 
+## modeling on the go
 
 set.seed = 42
 MLR_N_All <- train(
@@ -360,15 +351,15 @@ modelEval_MLR_N_All <- as.data.frame(modelEval_MLR_N_All)
 mse_MLR_N_All <- mean((modelEval_MLR_N_All$Actual - modelEval_MLR_N_All$Predicted)^2)
 rmse_MLR_N_All <- sqrt(mse_MLR_N_All)
 rmse_MLR_N_All
-	[1]  0.1401671
+[1]  0.1401671
 
 mae_MLR_N_All <- ModelMetrics::mae(y_test_N_all, preds_MLR_N_All)
 mae_MLR_N_All
-		[1] 0.1148419
+[1] 0.1148419
 
 bias_MLR_N_All <- Metrics::bias(y_test_N_all, preds_MLR_N_All)
 bias_MLR_N_All
-		[1] 9.123912e-05
+[1] 9.123912e-05
 
 
 
@@ -406,19 +397,20 @@ modelEval_LOG_GLM_N_All <- as.data.frame(modelEval_LOG_GLM_N_All)
 mse_LOG_GLM_N_All <- mean((modelEval_LOG_GLM_N_All$Actual - modelEval_LOG_GLM_N_All$Predicted)^2)
 rmse_LOG_GLM_N_All <- sqrt(mse_LOG_GLM_N_All)
 rmse_LOG_GLM_N_All
-	[1] 0.1393914
+[1] 0.1393914
 
 mae_log_GLM_N_All <- ModelMetrics::mae(y_test_N_all, preds_LOG_GLM_N_All)
 mae_log_GLM_N_All
-	[1] 0.1141461
+[1] 0.1141461
 
 bias_log_GLM_N_All <- Metrics::bias(y_test_N_all, preds_LOG_GLM_N_All)
 bias_log_GLM_N_All
-	[1] -0.0001055489
+[1] -0.0001055489
 
 
-# Multivariate adaptive regression spline
+# Multivariate adaptive regression spline/MARS 
 
+#tuning model 1
 hyper_grid_mars <- expand.grid(
   degree = 1:5, 
   nprune = seq(2, 100, length.out = 10) %>% floor()
@@ -476,6 +468,7 @@ hyper_grid_mars2 <- expand.grid(
   nprune = seq(20, 30, length.out = 2) %>% floor()
 )
 
+#tuning model 2
 set.seed(42)
 # cross validated model
 tuned_mars_N_All2 <- train(
@@ -525,6 +518,7 @@ tuned_mars_N_All2$bestTune
   nprune degree
 1     20      3
 
+#resamples to get model comparison
 res_mars <- resamples(list(mars1 = tuned_mars_N_All, mars2 = tuned_mars_N_All2))
 		summary(res_mars)
 
@@ -568,7 +562,7 @@ plot_res_mars<- plotres_mars + scale_y_discrete(limits = c("mars1", "mars2"))+
 	theme(text=element_text(size=13, family="Palatino"),
 	axis.title.y=element_blank())+theme( legend.position="none") 
 
-plot_res_mars
+plot_res_mars #similar performance (both in resamples summary and boxplots)
 
 
 preds_MARS_N_All <- predict(tuned_mars_N_All, test_N_all)
@@ -591,7 +585,7 @@ bias_mars_N_All
 	[1] -0.004937763
 
 
-#Cubist
+#Cubist (Quinlan's rule-based)
 
 #tuning1
 hyper_grid_cubist1 <- expand.grid(committees = c(1, 10, 50, 100), neighbors = c(0, 1, 5, 9))
@@ -696,7 +690,7 @@ plot_res_cubist<- plotres_cubist + scale_y_discrete(limits = c("cubist1", "cubis
 	theme(text=element_text(size=13, family="Palatino"),
 	axis.title.y=element_blank())+theme( legend.position="none") ## kesimpulan:
 
-plot_res_cubist
+plot_res_cubist #podo
 
 preds_CUBIST_N_All <- predict(tuned_cubist_N_All1, test_N_all)
 
@@ -719,6 +713,8 @@ bias_Cubist_N_All
 
 
 ## Random Forest
+
+#try ranger first to grasp initial hyperparameterisation
 
 hyper_grid_RF_N_all <- expand.grid(
   mtry       = seq(2, 10, by = 1),
@@ -762,8 +758,9 @@ hyper_grid_RF_N_all %>%
 
 
 
-# use aforementioned tuning parameterisation to the caret
-				
+# use aforementioned tuning parameterisation to supply caret
+
+# tuning model 1
 tunegrid_N1 <- expand.grid(.mtry = c(8:11)) 
 
 set.seed(123)
@@ -798,6 +795,8 @@ print(RF_N_caret)
 		The final value used for the model was mtry = 11.
 
 
+# tuning model 2
+
 tunegrid_N2 <- expand.grid(.mtry = c(8:11)) 
 
 RF_N_caret2 <- train(
@@ -808,7 +807,7 @@ RF_N_caret2 <- train(
 					metric= "RMSE",
 					verbose = FALSE, 
 					tuneGrid = tunegrid_N2,
-					n.trees = c(4:50)*100) ## lebih unggul --> model final
+					n.trees = c(4:50)*100) ## tweaking num.of.trees inside
  
 print(RF_N_caret2) 
 		Random Forest 
@@ -833,8 +832,31 @@ print(RF_N_caret2)
 RF_N_caret2$finalModel$ntree
 [1] 500
 
+# RF model comparison
 res_RF <- resamples(list(RF1 = RF_N_caret, RF2 = RF_N_caret2))
+summary(res_RF)
 	
+	Call:
+	summary.resamples(object = res_RF)
+	
+	Models: RF1, RF2 
+	Number of resamples: 50 
+	
+	MAE 
+	          Min.    1st Qu.     Median       Mean    3rd Qu.       Max. NA's
+	RF1 0.03475104 0.04339117 0.04619703 0.04637856 0.04927786 0.05942593    0
+	RF2 0.01229066 0.01676799 0.01879054 0.01959157 0.02150510 0.03763588    0
+	
+	RMSE 
+	          Min.    1st Qu.     Median       Mean    3rd Qu.       Max. NA's
+	RF1 0.04723525 0.06463236 0.06782356 0.06925170 0.07289575 0.10900853    0
+	RF2 0.01809156 0.02986096 0.03491292 0.03695258 0.04241209 0.08535481    0
+	
+	Rsquared 
+	         Min.   1st Qu.    Median      Mean   3rd Qu.      Max. NA's
+	RF1 0.5842640 0.8272512 0.8624608 0.8512394 0.8835827 0.9351897    0
+	RF2 0.7576628 0.9472108 0.9675881 0.9544924 0.9756922 0.9908121    0 #tweaked model win 
+
 scales_RF <- list(x=list(relation="free"), y=list(relation="free"))
 
 bwplot(res_RF, scales=scales_RF)
@@ -851,9 +873,9 @@ res_RF$values %>% #extract the values
 plot_res_RF<- plotres_RF + scale_y_discrete(limits = c("RF1", "RF2"))+
     scale_fill_viridis(discrete = TRUE) + theme_bw()  + 
 	theme(text=element_text(size=13, family="Palatino"),
-	axis.title.y=element_blank())+theme( legend.position="none") ## kesimpulan: RF2 lebih unggul
+	axis.title.y=element_blank())+theme( legend.position="none") 
 
-plot_res_RF
+plot_res_RF ## final to model 2
 
 
 preds_RF_N_All_Final <- predict(RF_N_caret2, test_N_all)
