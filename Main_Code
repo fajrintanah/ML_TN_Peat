@@ -1763,9 +1763,6 @@ svMean_LogGLM+bee_LogGLM+svMean_GBM+bee_GBM+
 svMean_Cubist+bee_Cubist+plot_layout(nrow=3)
 
 
-
-
-
 ## dependence plot
 
 
@@ -1930,14 +1927,11 @@ dep_XGB_Total_Fe <- sv_dependence(sv_XGB, v = "Total_Fe")+
 							scale_color_continuous(guide = guide_colorbar(
 							ticks = FALSE, barheight = 10), type = "viridis")
 
-
 dep_mlr_Total_Fe+dep_LogGLM_Total_Fe+dep_RF_Total_Fe+dep_GBM_Total_Fe+dep_XGB_Total_Fe
 
 dep_LogGLM_depth+dep_GBM_depth+
 dep_LogGLM_OC+dep_GBM_OC +
 dep_LogGLM_Total_Fe+dep_GBM_Total_Fe+plot_layout(nrow=3)
-
-
 
 dep_mlr_BD <- sv_dependence(sv_LM, v = "BD")+
 						theme_bw()+ 
