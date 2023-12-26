@@ -44,6 +44,8 @@ library(shapviz)
 library(readxl)
 library(boot)
 
+windowsFonts(Palatino=windowsFont("Palatino Linotype")) #setup font type to comply the Journal's font
+
 library(readxl)
 N_all_fix <- read_excel("D:/Publikasi/Pak Heru B Pulunggono/16 Machine Learning for N in peat yusuf/data/R_fix_yusuf.xlsx")
 View(N_all_fix)
@@ -85,6 +87,17 @@ str(N_all_fix)
 		 - attr(*, "na.action")= 'omit' Named int [1:11] 9 21 40 43 49 55 56 57 58 93 ...
 		  ..- attr(*, "names")= chr [1:11] "9" "21" "40" "43" ...
 
+#histogram frequency for original dataset
+plot_dist_N1 <- N_all_fix %>% 
+				ggplot( aes(x=Total_N)) +
+				geom_density(fill="#69b3a2", color="#e9ecef", alpha=0.8)+
+				#geom_histogram( color="#e9ecef", alpha=0.6, position = 'identity') +
+				theme_bw()+
+				labs(x = " Total N (%)", y = "Frequency")+
+				theme(text=element_text(size=13,family="Palatino"))
+								
+plot_dist_N1
+
 
 ## bootstrapping with replacement 
 boots_N <- N_all_fix %>% 
@@ -111,7 +124,7 @@ str(boots_N)
 		 - attr(*, "na.action")= 'omit' Named int [1:11] 9 21 40 43 49 55 56 57 58 93 ...
 		  ..- attr(*, "names")= chr [1:11] "9" "21" "40" "43" ...
 
-windowsFonts(Palatino=windowsFont("Palatino Linotype")) #setup font type to comply the Journal's font
+
 
 # Correlation using ggally package
 
@@ -279,13 +292,13 @@ IndvarNames1 = list(
 'Total_N'="Total N (%)",
 'Total_Fe' = "Total Fe (mg/kg")
 
-#bikin fungsi label, passing ke facet_wrap ggplot2
+# make label function, passing to facet_wrap ggplot2
 
 indvar_labeller1 <- function(variable,value){
   return(IndvarNames1[value])
 }
 
-# fungsi eliminasi outlier, passing ke stat_summary ggplot2
+# outlier elimination function, passing to stat_summary ggplot2
 
 calc_stat1 <- function(x) {
   coef <- 1.5
@@ -313,7 +326,7 @@ boxplot_N
 plot_dist_N+boxplot_N+plot_layout(ncol=1) #merge total N distribution to covariate's boxplots
 
 
-## modeling on the go
+## modelling on the go
 
 set.seed = 42
 MLR_N_All <- train(
@@ -430,7 +443,7 @@ summary(tuned_mars_N_All)
 			Call: earth(x=data.frame[431,12], y=c(0.3257,0.3886...), keepxy=TRUE,
 						degree=3, nprune=23)
 
-														   coefficients
+								        coefficients
 			(Intercept)                                     0.149855370
 			h(40-Depth)                                    -0.006020791
 			h(Depth-40)                                     0.014085582
