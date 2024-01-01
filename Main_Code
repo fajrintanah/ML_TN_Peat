@@ -124,7 +124,7 @@ p1_boot_corr <- ggpairs(N_all_boot_corr,
 p1_boot_corr+theme(text = element_text(size=11, family="Palatino"))	
 
 
-## Modelling
+## Preprocessing prior to modelling
 
 #sample split (70:30)
 set.seed(42)
