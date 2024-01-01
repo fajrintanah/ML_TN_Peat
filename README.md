@@ -5,4 +5,4 @@
 
 #Author Pulunggono HB, Yusuf AM, Nurazizah LL, Zulfajrin M. August. 2023.
 
-#published by CELEBES Agricultural Journal https://ojs.untika.ac.id/index.php/faperta/
+#published by CELEBES Agricultural Journal [https://ojs.untika.ac.id/index.php/faperta/](http://dx.doi.org/10.52045/jca.v4i1.592)http://dx.doi.org/10.52045/jca.v4i1.592
