@@ -31,8 +31,8 @@ library(xgboost)	#extreeme gradient boosting
 library(ModelMetrics) #get model metrics
 library(Metrics) 	#get ML model metrics
 library(Cubist) #Cubist model
-library(FactoMineR)#PCANguyen
-library(factoextra) #PCANguyen
+library(FactoMineR)#PCA
+library(factoextra) #PCA
 library(rattle)
 library(vip)
 library(shapper)
@@ -50,42 +50,14 @@ library(readxl)
 N_all_fix <- read_excel("D:/Publikasi/Pak Heru B Pulunggono/16 Machine Learning for N in peat yusuf/data/R_fix_yusuf.xlsx")
 View(N_all_fix)
 str(N_all_fix)
-		tibble [120 × 13] (S3: tbl_df/tbl/data.frame)
-		 $ LU_OP   : num [1:120] 1 1 1 1 1 1 1 1 1 1 ...
-		 $ LU_B    : num [1:120] 0 0 0 0 0 0 0 0 0 0 ...
-		 $ OP_Dist1: num [1:120] 1 1 1 1 1 1 1 1 1 1 ...
-		 $ OP_Dist2: num [1:120] 0 0 0 0 0 0 0 0 0 0 ...
-		 $ OP_Dist3: num [1:120] 0 0 0 0 0 0 0 0 0 0 ...
-		 $ OP_Dist4: num [1:120] 0 0 0 0 0 0 0 0 0 0 ...
-		 $ Depth   : num [1:120] 20 40 60 20 40 60 20 40 60 20 ...
-		 $ Org_C   : num [1:120] 0.38 0.417 0.487 0.546 0.555 ...
-		 $ pH      : num [1:120] 3.99 3.77 3.72 3.99 3.84 3.78 3.92 3.85 3.73 3.63 ...
-		 $ Total_N : num [1:120] 0.438 0.326 0.739 0.389 0.237 ...
-		 $ PD      : num [1:120] 1.83 1.77 1.62 1.83 1.77 1.62 1.76 1.77 1.62 1.83 ...
-		 $ BD      : num [1:120] 0.166 0.105 0.103 0.163 0.115 ...
-		 $ Total_Fe: num [1:120] 325 219 182 675 183 ...
+
 
 N_all_fix$Org_C <- N_all_fix$Org_C *100		#convert Org-C to percent value 
 N_all_fix <- na.omit(N_all_fix)			#omit missing values
 
 #other preprocessing had been done outside of R (resulting in N.A)
 str(N_all_fix)
-		tibble [109 × 13] (S3: tbl_df/tbl/data.frame)
-		 $ LU_OP   : num [1:109] 1 1 1 1 1 1 1 1 1 1 ...
-		 $ LU_B    : num [1:109] 0 0 0 0 0 0 0 0 0 0 ...
-		 $ OP_Dist1: num [1:109] 1 1 1 1 1 1 1 1 1 1 ...
-		 $ OP_Dist2: num [1:109] 0 0 0 0 0 0 0 0 0 0 ...
-		 $ OP_Dist3: num [1:109] 0 0 0 0 0 0 0 0 0 0 ...
-		 $ OP_Dist4: num [1:109] 0 0 0 0 0 0 0 0 0 0 ...
-		 $ Depth   : num [1:109] 20 40 60 20 40 60 20 40 20 40 ...
-		 $ Org_C   : num [1:109] 38 41.7 48.7 54.6 55.5 ...
-		 $ pH      : num [1:109] 3.99 3.77 3.72 3.99 3.84 3.78 3.92 3.85 3.63 3.55 ...
-		 $ Total_N : num [1:109] 0.438 0.326 0.739 0.389 0.237 ...
-		 $ PD      : num [1:109] 1.83 1.77 1.62 1.83 1.77 1.62 1.76 1.77 1.83 1.77 ...
-		 $ BD      : num [1:109] 0.166 0.105 0.103 0.163 0.115 ...
-		 $ Total_Fe: num [1:109] 325 219 182 675 183 ...
-		 - attr(*, "na.action")= 'omit' Named int [1:11] 9 21 40 43 49 55 56 57 58 93 ...
-		  ..- attr(*, "names")= chr [1:11] "9" "21" "40" "43" ...
+
 
 #histogram frequency for original dataset
 plot_dist_N1 <- N_all_fix %>% 
@@ -107,39 +79,11 @@ boots_N <- N_all_fix %>%
   )
   
 str(boots_N)
-		tibble [609 × 13] (S3: tbl_df/tbl/data.frame)
-		 $ LU_OP   : num [1:609] 1 1 1 1 1 1 1 1 1 1 ...
-		 $ LU_B    : num [1:609] 0 0 0 0 0 0 0 0 0 0 ...
-		 $ OP_Dist1: num [1:609] 1 1 1 1 1 1 1 1 1 1 ...
-		 $ OP_Dist2: num [1:609] 0 0 0 0 0 0 0 0 0 0 ...
-		 $ OP_Dist3: num [1:609] 0 0 0 0 0 0 0 0 0 0 ...
-		 $ OP_Dist4: num [1:609] 0 0 0 0 0 0 0 0 0 0 ...
-		 $ Depth   : num [1:609] 20 40 60 20 40 60 20 40 20 40 ...
-		 $ Org_C   : num [1:609] 38 41.7 48.7 54.6 55.5 ...
-		 $ pH      : num [1:609] 3.99 3.77 3.72 3.99 3.84 3.78 3.92 3.85 3.63 3.55 ...
-		 $ Total_N : num [1:609] 0.438 0.326 0.739 0.389 0.237 ...
-		 $ PD      : num [1:609] 1.83 1.77 1.62 1.83 1.77 1.62 1.76 1.77 1.83 1.77 ...
-		 $ BD      : num [1:609] 0.166 0.105 0.103 0.163 0.115 ...
-		 $ Total_Fe: num [1:609] 325 219 182 675 183 ...
-		 - attr(*, "na.action")= 'omit' Named int [1:11] 9 21 40 43 49 55 56 57 58 93 ...
-		  ..- attr(*, "names")= chr [1:11] "9" "21" "40" "43" ...
-
-
 
 # Correlation using ggally package
 
 N_all_fix_corr = subset(N_all_fix, select = -c(1:6)) #subset to eliminate one-hot-encoded factors
 str(N_all_fix_corr)
-		tibble [109 × 7] (S3: tbl_df/tbl/data.frame)
-		 $ Depth   : num [1:109] 20 40 60 20 40 60 20 40 20 40 ...
-		 $ Org_C   : num [1:109] 38 41.7 48.7 54.6 55.5 ...
-		 $ pH      : num [1:109] 3.99 3.77 3.72 3.99 3.84 3.78 3.92 3.85 3.63 3.55 ...
-		 $ Total_N : num [1:109] 0.438 0.326 0.739 0.389 0.237 ...
-		 $ PD      : num [1:109] 1.83 1.77 1.62 1.83 1.77 1.62 1.76 1.77 1.83 1.77 ...
-		 $ BD      : num [1:109] 0.166 0.105 0.103 0.163 0.115 ...
-		 $ Total_Fe: num [1:109] 325 219 182 675 183 ...
-		 - attr(*, "na.action")= 'omit' Named int [1:11] 9 21 40 43 49 55 56 57 58 93 ...
-		  ..- attr(*, "names")= chr [1:11] "9" "21" "40" "43" ...
 
 #build a custom function for more flexibility to adjust ggally
 
@@ -201,51 +145,8 @@ train_N_all_df <- data.frame(train_N_all)
 test_N_all_df <-data.frame(test_N_all)
 
 summary(train_N_all)
-			 LU_OP             LU_B           OP_Dist1        OP_Dist2         OP_Dist3     
-		 Min.   :0.0000   Min.   :0.0000   Min.   :0.000   Min.   :0.0000   Min.   :0.0000  
-		 1st Qu.:1.0000   1st Qu.:0.0000   1st Qu.:1.000   1st Qu.:0.0000   1st Qu.:0.0000  
-		 Median :1.0000   Median :0.0000   Median :1.000   Median :0.0000   Median :0.0000  
-		 Mean   :0.7564   Mean   :0.2436   Mean   :2.136   Mean   :0.2227   Mean   :0.2668  
-		 3rd Qu.:1.0000   3rd Qu.:0.0000   3rd Qu.:4.500   3rd Qu.:0.0000   3rd Qu.:1.0000  
-		 Max.   :1.0000   Max.   :1.0000   Max.   :4.500   Max.   :1.0000   Max.   :1.0000  
-			OP_Dist4          Depth           Org_C             pH           Total_N       
-		 Min.   :0.0000   Min.   :20.00   Min.   :37.83   Min.   :3.440   Min.   :0.06157  
-		 1st Qu.:0.0000   1st Qu.:20.00   1st Qu.:48.45   1st Qu.:3.630   1st Qu.:0.22879  
-		 Median :0.0000   Median :40.00   Median :52.89   Median :3.720   Median :0.37781  
-		 Mean   :0.2436   Mean   :38.75   Mean   :51.05   Mean   :3.713   Mean   :0.37495  
-		 3rd Qu.:0.0000   3rd Qu.:60.00   3rd Qu.:55.42   3rd Qu.:3.810   3rd Qu.:0.49361  
-		 Max.   :1.0000   Max.   :60.00   Max.   :57.00   Max.   :3.990   Max.   :0.78432  
-			   PD              BD             Total_Fe     
-		 Min.   :0.660   Min.   :0.05999   Min.   : 33.16  
-		 1st Qu.:1.230   1st Qu.:0.09840   1st Qu.:182.59  
-		 Median :1.620   Median :0.12000   Median :316.01  
-		 Mean   :1.528   Mean   :0.12132   Mean   :373.67  
-		 3rd Qu.:1.770   3rd Qu.:0.14542   3rd Qu.:526.88  
-		 Max.   :2.000   Max.   :0.18205   Max.   :791.34  
 
 summary(test_N_all )
-			 LU_OP             LU_B           OP_Dist1       OP_Dist2         OP_Dist3     
-		 Min.   :0.0000   Min.   :0.0000   Min.   :0.00   Min.   :0.0000   Min.   :0.0000  
-		 1st Qu.:1.0000   1st Qu.:0.0000   1st Qu.:1.00   1st Qu.:0.0000   1st Qu.:0.0000  
-		 Median :1.0000   Median :0.0000   Median :1.00   Median :0.0000   Median :0.0000  
-		 Mean   :0.7584   Mean   :0.2416   Mean   :2.16   Mean   :0.2191   Mean   :0.2753  
-		 3rd Qu.:1.0000   3rd Qu.:0.0000   3rd Qu.:4.50   3rd Qu.:0.0000   3rd Qu.:1.0000  
-		 Max.   :1.0000   Max.   :1.0000   Max.   :4.50   Max.   :1.0000   Max.   :1.0000  
-			OP_Dist4          Depth           Org_C             pH           Total_N       
-		 Min.   :0.0000   Min.   :20.00   Min.   :37.83   Min.   :3.440   Min.   :0.06157  
-		 1st Qu.:0.0000   1st Qu.:20.00   1st Qu.:48.45   1st Qu.:3.630   1st Qu.:0.21987  
-		 Median :0.0000   Median :40.00   Median :53.74   Median :3.720   Median :0.37781  
-		 Mean   :0.2416   Mean   :38.65   Mean   :51.22   Mean   :3.717   Mean   :0.37484  
-		 3rd Qu.:0.0000   3rd Qu.:60.00   3rd Qu.:55.42   3rd Qu.:3.810   3rd Qu.:0.49520  
-		 Max.   :1.0000   Max.   :60.00   Max.   :57.00   Max.   :3.990   Max.   :0.78432  
-			   PD              BD             Total_Fe     
-		 Min.   :0.660   Min.   :0.06000   Min.   : 33.16  
-		 1st Qu.:1.280   1st Qu.:0.09975   1st Qu.:182.46  
-		 Median :1.620   Median :0.12113   Median :312.96  
-		 Mean   :1.518   Mean   :0.12350   Mean   :368.22  
-		 3rd Qu.:1.770   3rd Qu.:0.14159   3rd Qu.:526.88  
-		 Max.   :2.000   Max.   :0.18205   Max.   :791.34  
-
 
 ##visualize distribution 
 N_train <- train_N_all%>%
@@ -279,10 +180,7 @@ baru_N <-  N_df%>% subset(,-c(1:7))%>%
 		pivot_longer(cols = -"Status", names_to="Property", values_to="value")
 
 str(baru_N)	
-		tibble [3,654 × 3] (S3: tbl_df/tbl/data.frame)
-		 $ Status  : chr [1:3654] "Training" "Training" "Training" "Training" ...
-		 $ Property: chr [1:3654] "Org_C" "pH" "Total_N" "PD" ...
-		 $ value   : num [1:3654] 41.73 3.77 0.326 1.77 0.105 ...
+
 
 IndvarNames1 = list(
 'BD'="BD (g/cm3)",
@@ -339,20 +237,7 @@ MLR_N_All <- train(
 )
 
 MLR_N_All 
-		Linear Regression 
 
-		431 samples
-		 12 predictor
-
-		No pre-processing
-		Resampling: Cross-Validated (5 fold, repeated 10 times) 
-		Summary of sample sizes: 346, 345, 344, 344, 345, 345, ... 
-		Resampling results:
-
-		  RMSE       Rsquared   MAE      
-		  0.1475752  0.2687833  0.1203446
-
-		Tuning parameter 'intercept' was held constant at a value of TRUE
 
 
 preds_MLR_N_All <- predict(MLR_N_All, test_N_all)
@@ -364,16 +249,12 @@ modelEval_MLR_N_All <- as.data.frame(modelEval_MLR_N_All)
 mse_MLR_N_All <- mean((modelEval_MLR_N_All$Actual - modelEval_MLR_N_All$Predicted)^2)
 rmse_MLR_N_All <- sqrt(mse_MLR_N_All)
 rmse_MLR_N_All
-[1]  0.1401671
 
 mae_MLR_N_All <- ModelMetrics::mae(y_test_N_all, preds_MLR_N_All)
 mae_MLR_N_All
-[1] 0.1148419
 
 bias_MLR_N_All <- Metrics::bias(y_test_N_all, preds_MLR_N_All)
 bias_MLR_N_All
-[1] 9.123912e-05
-
 
 
 ## Log - GLM regression
@@ -388,18 +269,6 @@ tuned_log_N_All <- train(
 )
 
 tuned_log_N_All
-		Generalized Linear Model 
-
-		431 samples
-		 12 predictor
-
-		No pre-processing
-		Resampling: Cross-Validated (5 fold, repeated 10 times) 
-		Summary of sample sizes: 345, 345, 344, 345, 345, 344, ... 
-		Resampling results:
-
-		  RMSE       Rsquared   MAE      
-		  0.1470837  0.2702196  0.1200248
 
 preds_LOG_GLM_N_All <- predict(tuned_log_N_All, test_N_all)
 
@@ -410,16 +279,12 @@ modelEval_LOG_GLM_N_All <- as.data.frame(modelEval_LOG_GLM_N_All)
 mse_LOG_GLM_N_All <- mean((modelEval_LOG_GLM_N_All$Actual - modelEval_LOG_GLM_N_All$Predicted)^2)
 rmse_LOG_GLM_N_All <- sqrt(mse_LOG_GLM_N_All)
 rmse_LOG_GLM_N_All
-[1] 0.1393914
 
 mae_log_GLM_N_All <- ModelMetrics::mae(y_test_N_all, preds_LOG_GLM_N_All)
 mae_log_GLM_N_All
-[1] 0.1141461
 
 bias_log_GLM_N_All <- Metrics::bias(y_test_N_all, preds_LOG_GLM_N_All)
 bias_log_GLM_N_All
-[1] -0.0001055489
-
 
 # Multivariate adaptive regression spline/MARS 
 
@@ -440,40 +305,8 @@ tuned_mars_N_All <- train(
   tuneGrid 		= hyper_grid_mars
 							)
 summary(tuned_mars_N_All)
-			Call: earth(x=data.frame[431,12], y=c(0.3257,0.3886...), keepxy=TRUE,
-						degree=3, nprune=23)
-
-								        coefficients
-			(Intercept)                                     0.149855370
-			h(40-Depth)                                    -0.006020791
-			h(Depth-40)                                     0.014085582
-			h(47.0239-Org_C)                                0.028222459
-			h(Org_C-47.0239)                                0.018038780
-			h(215.104-Total_Fe)                             0.004457609
-			h(Total_Fe-215.104)                             0.000743046
-			h(OP_Dist1-3) * h(47.0239-Org_C)                0.063755432
-			h(Depth-40) * h(52.8884-Org_C)                  0.002647498
-			h(40-Depth) * h(BD-0.12)                        0.132317542
-			h(40-Depth) * h(0.12-BD)                        0.210493220
-			h(Depth-40) * h(Total_Fe-179.072)              -0.000046731
-			h(Depth-40) * h(179.072-Total_Fe)              -0.000409814
-			h(Org_C-49.1428) * h(215.104-Total_Fe)         -0.000506622
-			h(3.55-pH) * h(215.104-Total_Fe)               -0.058099200
-			h(pH-3.55) * h(215.104-Total_Fe)               -0.013651492
-			h(0.131362-BD) * h(Total_Fe-215.104)           -0.016623239
-			h(BD-0.131362) * h(Total_Fe-215.104)           -0.015885566
-			h(Depth-40) * h(pH-3.59) * h(179.072-Total_Fe)  0.003053125
-			h(40-Depth) * h(BD-0.12) * h(325.382-Total_Fe) -0.002192144
-
-			Selected 20 of 25 terms, and 6 of 12 predictors (nprune=23)
-			Termination condition: Reached nk 25
-			Importance: Depth, Org_C, Total_Fe, OP_Dist1, BD, pH, LU_OP-unused, ...
-			Number of terms at each degree of interaction: 1 6 11 2
-			GCV 0.01053951    RSS 3.577716    GRSq 0.6436777    RSq 0.7180521
 
 tuned_mars_N_All$bestTune
-		   nprune degree
-		23     23      3
 
 
 hyper_grid_mars2 <- expand.grid(
@@ -493,69 +326,14 @@ tuned_mars_N_All2 <- train(
   tuneGrid 		= hyper_grid_mars2
 							)
 summary(tuned_mars_N_All2)
-		Call: earth(x=data.frame[431,12],
-					y=c(0.3257,0.3886...),
-					keepxy=TRUE, degree=3,
-					nprune=30)
-
-													   coefficients
-		(Intercept)                                     0.149855370
-		h(40-Depth)                                    -0.006020791
-		h(Depth-40)                                     0.014085582
-		h(47.0239-Org_C)                                0.028222459
-		h(Org_C-47.0239)                                0.018038780
-		h(215.104-Total_Fe)                             0.004457609
-		h(Total_Fe-215.104)                             0.000743046
-		h(OP_Dist1-3) * h(47.0239-Org_C)                0.063755432
-		h(Depth-40) * h(52.8884-Org_C)                  0.002647498
-		h(40-Depth) * h(BD-0.12)                        0.132317542
-		h(40-Depth) * h(0.12-BD)                        0.210493220
-		h(Depth-40) * h(Total_Fe-179.072)              -0.000046731
-		h(Depth-40) * h(179.072-Total_Fe)              -0.000409814
-		h(Org_C-49.1428) * h(215.104-Total_Fe)         -0.000506622
-		h(3.55-pH) * h(215.104-Total_Fe)               -0.058099200
-		h(pH-3.55) * h(215.104-Total_Fe)               -0.013651492
-		h(0.131362-BD) * h(Total_Fe-215.104)           -0.016623239
-		h(BD-0.131362) * h(Total_Fe-215.104)           -0.015885566
-		h(Depth-40) * h(pH-3.59) * h(179.072-Total_Fe)  0.003053125
-		h(40-Depth) * h(BD-0.12) * h(325.382-Total_Fe) -0.002192144
-
-		Selected 20 of 25 terms, and 6 of 12 predictors (nprune=30)
-		Termination condition: Reached nk 25
-		Importance: Depth, Org_C, Total_Fe, ...
-		Number of terms at each degree of interaction: 1 6 11 2
-		GCV 0.01053951    RSS 3.577716    GRSq 0.6436777    RSq 0.7180521
 
 
 tuned_mars_N_All2$bestTune
-  nprune degree
-1     20      3
+
 
 #resamples to get model comparison
 res_mars <- resamples(list(mars1 = tuned_mars_N_All, mars2 = tuned_mars_N_All2))
-		summary(res_mars)
-
-		Call:
-		summary.resamples(object = res_mars)
-
-		Models: mars1, mars2 
-		Number of resamples: 50 
-
-		MAE 
-					Min.    1st Qu.     Median       Mean    3rd Qu.       Max. NAs
-		mars1 0.04889241 0.06747015 0.07528598 0.07453583 0.08156179 0.09728019    0
-		mars2 0.04889241 0.06747015 0.07528598 0.07453583 0.08156179 0.09728019    0
-
-		RMSE 
-					Min.    1st Qu.    Median      Mean   3rd Qu.      Max. NAs
-		mars1 0.06865035 0.09453587 0.1004607 0.1046101 0.1150685 0.1396338    0
-		mars2 0.06865035 0.09453587 0.1004607 0.1046101 0.1150685 0.1396338    0
-
-		Rsquared 
-				   Min.   1st Qu.    Median      Mean   3rd Qu.    Max. NAs
-		mars1 0.4255194 0.5683839 0.6454163 0.6290887 0.6893031 0.83988    0
-		mars2 0.4255194 0.5683839 0.6454163 0.6290887 0.6893031 0.83988    0	
-		
+summary(res_mars)		
 		
 scales_mars <- list(x=list(relation="free"), y=list(relation="free"))
 
@@ -587,15 +365,12 @@ modelEval_MARS_N_All <- as.data.frame(modelEval_MARS_N_All)
 mse_MARS_N_All <- mean((modelEval_MARS_N_All$Actual - modelEval_MARS_N_All$Predicted)^2)
 rmse_MARS_N_All <- sqrt(mse_MARS_N_All)
 rmse_MARS_N_All
-	[1] 0.09123466
 
 mae_mars_N_All <- ModelMetrics::mae(y_test_N_all, preds_MARS_N_All)
 mae_mars_N_All
-	[1] 0.06408076
 
 bias_mars_N_All <- Metrics::bias(y_test_N_all, preds_MARS_N_All)
 bias_mars_N_All
-	[1] -0.004937763
 
 
 #Cubist (Quinlan's rule-based)
@@ -613,37 +388,7 @@ tuned_cubist_N_All1 <- train(
   trControl = trainControl(method = "repeatedcv", number = 5, repeats = 10)
   )
 tuned_cubist_N_All1
-		Cubist 
-
-		431 samples
-		 12 predictor
-
-		No pre-processing
-		Resampling: Cross-Validated (5 fold, repeated 10 times) 
-		Summary of sample sizes: 344, 345, 345, 345, 345, 345, ... 
-		Resampling results across tuning parameters:
-
-		  committees  neighbors  RMSE        Rsquared   MAE        
-			1         0          0.05150382  0.8891711  0.012324402
-			1         1          0.03421649  0.9331255  0.006429279
-			1         5          0.04385089  0.9146145  0.010912761
-			1         9          0.04678617  0.9059222  0.012063629
-		   10         0          0.03440519  0.9387885  0.008518483
-		   10         1          0.02787498  0.9497579  0.005434174
-		   10         5          0.03149450  0.9449687  0.007702649
-		   10         9          0.03262233  0.9428256  0.008295081
-		   50         0          0.03361654  0.9401451  0.008246351
-		   50         1          0.02802358  0.9497191  0.005484921
-		   50         5          0.03128395  0.9455304  0.007508155
-		   50         9          0.03215416  0.9437256  0.008010001
-		  100         0          0.03164929  0.9458465  0.007699530
-		  100         1          0.02691347  0.9533285  0.005239690
-		  100         5          0.02959422  0.9501918  0.007021041
-		  100         9          0.03035295  0.9487890  0.007481520
-
-		RMSE was used to select the optimal model using the smallest value.
-		The final values used for the model were committees = 100 and neighbors = 1.
-
+	
 #tuning2
 hyper_grid_cubist2 <- expand.grid(committees = c(50, 100), neighbors = c(1, 2, 3, 4))
 
@@ -661,29 +406,8 @@ tuned_cubist_N_All2
 
 
 res_cubist <- resamples(list(cubist1 = tuned_cubist_N_All1, cubist2 = tuned_cubist_N_All2))
-			summary(res_cubist)
+summary(res_cubist)
 
-		Call:
-		summary.resamples(object = res_cubist)
-
-		Models: cubist1, cubist2 
-		Number of resamples: 50 
-
-		MAE 
-						Min.      1st Qu.      Median       Mean     3rd Qu.      Max. NAs
-		cubist1 1.294117e-08 0.0008662386 0.002899379 0.00523969 0.008153754 0.0300755    0
-		cubist2 1.294117e-08 0.0008662386 0.002899379 0.00523969 0.008153754 0.0300755    0
-
-		RMSE 
-						Min.     1st Qu.    Median       Mean    3rd Qu.      Max. NAs
-		cubist1 3.352209e-08 0.005935388 0.0172291 0.02691347 0.03662521 0.1234791    0
-		cubist2 3.352209e-08 0.005935388 0.0172291 0.02691347 0.03662521 0.1234791    0
-
-		Rsquared 
-					 Min.  1st Qu.   Median      Mean  3rd Qu. Max. NAs
-		cubist1 0.5563984 0.950178 0.991041 0.9533285 0.998797    1    0
-		cubist2 0.5563984 0.950178 0.991041 0.9533285 0.998797    1    0
-		
 		
 scales_cubist <- list(x=list(relation="free"), y=list(relation="free"))
 
@@ -714,15 +438,12 @@ modelEval_CUBIST_N_All <- as.data.frame(modelEval_CUBIST_N_All)
 mse_CUBIST_N_All <- mean((modelEval_CUBIST_N_All$Actual - modelEval_CUBIST_N_All$Predicted)^2)
 rmse_CUBIST_N_All <- sqrt(mse_CUBIST_N_All)
 rmse_CUBIST_N_All
-1.213287e-07
 
 mae_Cubist_N_All <- ModelMetrics::mae(y_test_N_all, preds_CUBIST_N_All)
 mae_Cubist_N_All
-2.328173e-08
 
 bias_Cubist_N_All <- Metrics::bias(y_test_N_all, preds_CUBIST_N_All)
 bias_Cubist_N_All
-707359e-09
 
 
 ## Random Forest
@@ -756,18 +477,7 @@ for(i in 1:nrow(hyper_grid_RF_N_all)) {
 hyper_grid_RF_N_all %>% 
   dplyr::arrange(OOB_RMSE) %>%  
   arrange(OOB_RMSE) %>%
-		  top_n(-10, wt = OOB_RMSE)
-		   mtry node_size num.trees   OOB_RMSE
-		1     9        20       900 0.05212114
-		2     9        20       700 0.05220565
-		3     9        20       750 0.05221511
-		4     9        20       600 0.05224545
-		5     9        20       500 0.05228585
-		6     9        20       550 0.05229629
-		7     9        20       650 0.05229720
-		8     9        20       800 0.05230081
-		9     9        20       950 0.05232084
-		10    9        20       850 0.05236165
+		top_n(-10, wt = OOB_RMSE)
 
 
 
@@ -787,25 +497,7 @@ RF_N_caret <- train(
 					ntree = 900,
                    trControl = trainControl(method = "repeatedcv", number = 5, repeats=10))
 
-print(RF_N_caret) 
-		Random Forest 
-
-		431 samples
-		 12 predictor
-
-		No pre-processing
-		Resampling: Cross-Validated (5 fold, repeated 10 times) 
-		Summary of sample sizes: 345, 345, 344, 345, 345, 344, ... 
-		Resampling results across tuning parameters:
-
-		  mtry  RMSE        Rsquared   MAE       
-		   8    0.06985881  0.8559368  0.04789048
-		   9    0.06949726  0.8546894  0.04721392
-		  10    0.06929977  0.8531088  0.04673801
-		  11    0.06925170  0.8512394  0.04637856
-
-		RMSE was used to select the optimal model using the smallest value.
-		The final value used for the model was mtry = 11.
+print(RF_N_caret)
 
 
 # tuning model 2
@@ -823,53 +515,13 @@ RF_N_caret2 <- train(
 					n.trees = c(4:50)*100) ## tweaking num.of.trees inside
  
 print(RF_N_caret2) 
-		Random Forest 
-
-		431 samples
-		 12 predictor
-
-		No pre-processing
-		Resampling: Cross-Validated (5 fold, repeated 10 times) 
-		Summary of sample sizes: 345, 344, 345, 345, 345, 345, ... 
-		Resampling results across tuning parameters:
-
-		  mtry  RMSE        Rsquared   MAE       
-		   8    0.03758451  0.9539520  0.02021405
-		   9    0.03749239  0.9538281  0.02000775
-		  10    0.03699880  0.9546418  0.01970626
-		  11    0.03695258  0.9544924  0.01959157
-
-		RMSE was used to select the optimal model using the smallest value.
-		The final value used for the model was mtry = 11.
 
 RF_N_caret2$finalModel$ntree
-[1] 500
 
 # RF model comparison
 res_RF <- resamples(list(RF1 = RF_N_caret, RF2 = RF_N_caret2))
 summary(res_RF)
 	
-	Call:
-	summary.resamples(object = res_RF)
-	
-	Models: RF1, RF2 
-	Number of resamples: 50 
-	
-	MAE 
-	          Min.    1st Qu.     Median       Mean    3rd Qu.       Max. NA's
-	RF1 0.03475104 0.04339117 0.04619703 0.04637856 0.04927786 0.05942593    0
-	RF2 0.01229066 0.01676799 0.01879054 0.01959157 0.02150510 0.03763588    0
-	
-	RMSE 
-	          Min.    1st Qu.     Median       Mean    3rd Qu.       Max. NA's
-	RF1 0.04723525 0.06463236 0.06782356 0.06925170 0.07289575 0.10900853    0
-	RF2 0.01809156 0.02986096 0.03491292 0.03695258 0.04241209 0.08535481    0
-	
-	Rsquared 
-	         Min.   1st Qu.    Median      Mean   3rd Qu.      Max. NA's
-	RF1 0.5842640 0.8272512 0.8624608 0.8512394 0.8835827 0.9351897    0
-	RF2 0.7576628 0.9472108 0.9675881 0.9544924 0.9756922 0.9908121    0 #tweaked model win 
-
 scales_RF <- list(x=list(relation="free"), y=list(relation="free"))
 
 bwplot(res_RF, scales=scales_RF)
@@ -900,16 +552,14 @@ modelEval_RF_N_All <- as.data.frame(modelEval_RF_N_All)
 mse_RF_N_All <- mean((modelEval_RF_N_All$Actual - modelEval_RF_N_All$Predicted)^2)
 rmse_RF_N_All <- sqrt(mse_RF_N_All)
 rmse_RF_N_All
-[1] 0.01681139
+
 
 mae_rf_N_All <- ModelMetrics::mae(y_test_N_all, preds_RF_N_All_Final)
 mae_rf_N_All
-[1] 0.007871883
+
 
 bias_rf_N_All <- Metrics::bias(y_test_N_all, preds_RF_N_All_Final)
 bias_rf_N_All
-[1] 0.001398181
-
 
 
 ## Gradient Boosting Machine
@@ -933,10 +583,6 @@ gbm_N_All_caret1 <- train(
 )
 
 gbm_N_All_caret1$bestTune
-			n.trees interaction.depth
-		320    1000                 5
-			shrinkage n.minobsinnode
-		320       0.1              3
 
 #evaluate
 ggplot(gbm_N_All_caret1) 
@@ -962,10 +608,6 @@ gbm_N_All_caret2 <- train(
 )
 
 gbm_N_All_caret2$bestTune
-   n.trees interaction.depth
-10    5000                 3
-   shrinkage n.minobsinnode
-10       0.3              3
 
 #evaluate
 ggplot(gbm_N_All_caret2)
@@ -991,10 +633,6 @@ gbm_N_All_caret3 <- train(
 )
 
 gbm_N_All_caret3$bestTune
-			  n.trees interaction.depth
-			5    5000                 3
-			  shrinkage n.minobsinnode
-			5       0.3              3
 
 #evaluate
 ggplot(gbm_N_All_caret3)
@@ -1019,10 +657,6 @@ gbm_N_All_caret4 <- train(
 )
 
 gbm_N_All_caret4$bestTune
-  n.trees interaction.depth
-3    6000                 3
-  shrinkage n.minobsinnode
-3       0.3              3
 
 #evaluate
 ggplot(gbm_N_All_caret4)
@@ -1049,10 +683,7 @@ gbm_N_All_caret5 <- train(
 )
 
 gbm_N_All_caret5$bestTune
-		  n.trees interaction.depth
-		3    6000                 3
-		  shrinkage n.minobsinnode
-		3       0.3              3
+
 
 #evaluate
 ggplot(gbm_N_All_caret5)
@@ -1112,15 +743,14 @@ modelEval_GBM_N_All_caret1 <- as.data.frame(modelEval_GBM_N_All_caret1)
 mse_GBM_N_All_caret1 <- mean((modelEval_GBM_N_All_caret1$Actual - modelEval_GBM_N_All_caret1$Predicted)^2)
 rmse_GBM_N_All_caret1 <- sqrt(mse_GBM_N_All_caret1)
 rmse_GBM_N_All_caret1
-7.074973e-17
+
 
 mae_gbm_N_All <- ModelMetrics::mae(y_test_N_all, preds_GBM_N_All_caret1)
 mae_gbm_N_All
-4.541467e-17
+
 
 bias_gbm_N_All <- Metrics::bias(y_test_N_all, preds_GBM_N_All_caret1)
 bias_gbm_N_All
--4.794854e-18
 
 
 
@@ -1162,12 +792,7 @@ xgb_N_All = train(
 )
 
 xgb_N_All$bestTune
-    nrounds max_depth eta gamma
-208     350         4 0.1     0
-    colsample_bytree
-208                1
-    min_child_weight subsample
-208                1         1
+
 
 #evaluate
 ggplot(xgb_N_All )
@@ -1200,12 +825,7 @@ xgb_N_All2 = train(
 )
 
 xgb_N_All2$bestTune
-  nrounds max_depth eta gamma
-2     350         4 0.1     0
-  colsample_bytree min_child_weight
-2                1                1
-  subsample
-2         1
+
 
 #evaluate
 ggplot(xgb_N_All2 )
@@ -1246,12 +866,6 @@ xgb_N_All3 = train(
 )
 
 xgb_N_All3$bestTune
-			nrounds max_depth eta gamma
-		154     500         4 0.1     0
-			colsample_bytree
-		154              0.8
-			min_child_weight subsample
-		154                2       0.5
 		
 #evaluate
 ggplot(xgb_N_All3 )
@@ -1295,12 +909,6 @@ xgb_N_All4 = train(
 )
 
 xgb_N_All4$bestTune
-  nrounds max_depth eta gamma
-7    1000         4 0.1     0
-  colsample_bytree min_child_weight
-7              0.8                2
-  subsample
-7       0.5
 
 #evaluate
 ggplot(xgb_N_All4 )
@@ -1341,12 +949,6 @@ xgb_N_All5 = train(
 )
 
 xgb_N_All5$bestTune
-   nrounds max_depth eta gamma
-10   10000         4 0.1     0
-   colsample_bytree min_child_weight
-10              0.8                2
-   subsample
-10       0.5
 
 #evaluate (again -_-)
 
@@ -1362,61 +964,23 @@ modelEval_XGB_N_All <- as.data.frame(modelEval_XGB_N_All)
 mse_XGB_N_All <- mean((modelEval_XGB_N_All$Actual - modelEval_XGB_N_All$Predicted)^2)
 rmse_XGB_N_All <- sqrt(mse_XGB_N_All)
 rmse_XGB_N_All
-0.001826508
 
 mae_XGB_N_All <- ModelMetrics::mae(y_test_N_all, preds_XGB_N_All_Final)
 mae_XGB_N_All
-0.0008722181
 
 bias_XGB_N_All <- Metrics::bias(y_test_N_all, preds_XGB_N_All_Final)
 bias_XGB_N_All
-0.000154254
 
-#visualise model agreement
-# 1 by calobration (internally computed k-folds CV)
+
+# visualize model agreement
+# 1 by calibration (internally computed k-folds CV)
 
 models_compare_N <- resamples(list(LM=MLR_N_All, LogGLM=tuned_log_N_All, MARS=tuned_mars_N_All, 
 									CUBIST=tuned_cubist_N_All1, RF=RF_N_caret2, GBM=gbm_N_All_caret5, XGB=xgb_N_All5 ))
 
-# Summary of the models performances
+# Summary of the models' performances
 
 summary(models_compare_N)
-		Call:
-		summary.resamples(object = models_compare_N)
-
-		Models: LM, LogGLM, MARS, CUBIST, RF, GBM, XGB 
-		Number of resamples: 50 
-
-		MAE 
-					   Min.      1st Qu.      Median        Mean     3rd Qu.       Max. NAs
-		LM     1.032865e-01 0.1148018947 0.120326528 0.120344572 0.125875765 0.13623399    0
-		LogGLM 9.862711e-02 0.1149822719 0.119555414 0.120024818 0.125849875 0.13595484    0
-		MARS   4.889241e-02 0.0674701457 0.075285976 0.074535828 0.081561795 0.09728019    0
-		CUBIST 1.294117e-08 0.0008662386 0.002899379 0.005239690 0.008153754 0.03007550    0
-		RF     1.229066e-02 0.0167679942 0.018790539 0.019591570 0.021505100 0.03763588    0
-		GBM    4.936983e-17 0.0007629146 0.002728294 0.004106446 0.005963334 0.01654051    0
-		XGB    3.320272e-04 0.0012759127 0.002472493 0.004061510 0.005594597 0.02185559    0
-
-		RMSE 
-					   Min.     1st Qu.     Median       Mean    3rd Qu.       Max. NAs
-		LM     1.287069e-01 0.140892475 0.14758406 0.14757521 0.15482956 0.16977672    0
-		LogGLM 1.220109e-01 0.142681625 0.14533716 0.14708374 0.15385505 0.16706756    0
-		MARS   6.865035e-02 0.094535868 0.10046067 0.10461007 0.11506853 0.13963376    0
-		CUBIST 3.352209e-08 0.005935388 0.01722910 0.02691347 0.03662521 0.12347910    0
-		RF     1.809156e-02 0.029860963 0.03491292 0.03695258 0.04241209 0.08535481    0
-		GBM    7.549443e-17 0.007072756 0.01715688 0.01947360 0.02964906 0.06147276    0
-		XGB    4.953687e-04 0.006824174 0.01365972 0.01908128 0.02578449 0.09405303    0
-
-		Rsquared 
-					Min.   1st Qu.    Median      Mean   3rd Qu.      Max. NAs
-		LM     0.1496865 0.2096485 0.2616713 0.2687833 0.3198168 0.4689396    0
-		LogGLM 0.1388341 0.2225834 0.2692825 0.2702196 0.3049343 0.4340512    0
-		MARS   0.4255194 0.5683839 0.6454163 0.6290887 0.6893031 0.8398800    0
-		CUBIST 0.5563984 0.9501780 0.9910410 0.9533285 0.9987970 1.0000000    0
-		RF     0.7576628 0.9472108 0.9675881 0.9544924 0.9756922 0.9908121    0
-		GBM    0.8751239 0.9716733 0.9900660 0.9783098 0.9983538 1.0000000    0
-		XGB    0.7413845 0.9790914 0.9936214 0.9770633 0.9984596 0.9999919    0
-
 
 scales <- list(x=list(relation="free"), y=list(relation="free"))
 bwplot(models_compare_N, scales=scales)
@@ -1465,7 +1029,7 @@ plotN3_fix <- plotN3 + scale_y_discrete(limits = c("LM", "LogGLM", "MARS", "CUBI
 plotN1_fix+plotN2_fix+plotN3_fix
 
 
-#performance by validation method
+#performance by validation method, gather all metrices
 
 # 2 by validation (externally by the 30% validation data)
 
@@ -1520,15 +1084,6 @@ XGB_df_p <- data.frame(	Rsq = R2(preds_XGB_N_All_Final1, y_test_N_all),
 
 merged_all_model <- bind_rows(MLR_df_p, LogGLM_df_p,MARS_df_p,CUBIST_df_p, RF_df_p,GBM_df_p, XGB_df_p)
 merged_all_model 
-				Rsq         RMSE          MAE          BIAS  Model
-		1 0.3289702 1.401671e-01 1.148419e-01  9.123912e-05    MLR
-		2 0.3365425 1.393914e-01 1.141461e-01 -1.055489e-04 LogGLM
-		3 0.7199123 9.123466e-02 6.408076e-02 -4.937763e-03   MARS
-		4 1.0000000 1.213287e-07 2.328173e-08  6.707359e-09 CUBIST
-		5 0.9917447 1.681139e-02 7.871883e-03  1.398181e-03     RF
-		6 0.9999992 1.591850e-04 1.017097e-04  5.978220e-06    GBM
-		7 0.9999009 1.826508e-03 8.722181e-04  1.542540e-04    XGB
-
 
 ## Explaining ML with fastshap
 # set Monte Carlo Simulation to 1000
